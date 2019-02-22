@@ -21,9 +21,13 @@ added_audio = r"\Added_Audio\\"
 
 
 def the_slicer(audio, filename):
-    for i, chunk in enumerate(audio[::10000]):
+    max_from_source = 3000
+    for i, chunk in enumerate(audio[::100]):  # 100ms
         with open(filename + "-%s.wav" % i, "wb") as f:
             chunk.export(f, format="wav")
+
+        if i == max_from_source:  # Only really want x amount of instances from any single audio file
+            break
 
 
 def main():
@@ -35,8 +39,3 @@ def main():
 
 
 main()
-
-# Play code
-# wav_obj = sa.WaveObject.from_wave_file(audio)
-# play_obj = wav_obj.play()
-# play_obj.wait_done()

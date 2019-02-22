@@ -1,9 +1,10 @@
-from scipy.stats import kurtosis, skew
+from scipy.stats import kurtosis, skew, mode
 from scipy.io.wavfile import read
 from scipy.fftpack import fft
 import numpy as np
 import matplotlib.pyplot as plt
-
+from librosa import feature as lb
+import copy
 
 # np.set_printoptions(threshold=np.inf)
 
@@ -11,7 +12,8 @@ test_file_1 = r"E:\Steve_Files\Work\University\Year 4\Project\My Project\Audio_F
 test_file_2 = r"E:\Steve_Files\Work\University\Year 4\Project\My Project\Audio_Files\Audio_Files_Generated\No_Traffic_Incident\road_noise_1-655.wav"
 
 
-def amp_to_freq(audio_input):
+# Credit to StackOverflow user Anil_M for his answer on https://stackoverflow.com/questions/43284049/spectrogram-of-a-wave-file
+def amp_to_freq(audio_input, audio_dict):
     # Read file and get sampling freq [ usually 44100 Hz ]  and sound object
     sampling_frequency, sound_file = read(audio_input)
 
@@ -51,7 +53,7 @@ def amp_to_freq(audio_input):
     plt.show()
 
     # Plot frequency content
-    # We can get frquency from amplitude and time using FFT , Fast Fourier Transform algorithm
+    # We can get frequency from amplitude and time using FFT , Fast Fourier Transform algorithm
 
     # Get length of sound_file object array
     sound_file_length = len(sound_file)
@@ -72,7 +74,7 @@ def amp_to_freq(audio_input):
     fft_array = fft_array / float(sound_file_length)
 
     # FFT has both positive and negative information. Square to get positive only
-    fft_array = fft_array **2
+    fft_array = fft_array ** 2
 
     # Multiply by two (research why?)
     # Odd NFFT excludes Nyquist point
@@ -95,35 +97,41 @@ def amp_to_freq(audio_input):
     # Get List of element in frequency array
     # print frequency_array.dtype.type
     frequency_array_length = len(frequency_array)
-    print("frequency_array_length =", frequency_array_length)
-    np.savetxt("freqData.txt", frequency_array, fmt='%6.2f')
+    # print("frequency_array_length =", frequency_array_length)
+    # np.savetxt("freqData.txt", frequency_array, fmt='%6.2f')
 
     # Print fft_array information
-    print("fft_array Length =", len(fft_array))
-    np.savetxt("fftData.txt", fft_array)
+    # print("fft_array Length =", len(fft_array))
+    # np.savetxt("fftData.txt", fft_array)
 
-    add_mean_freq(true_freq_array, frequency_array_length)
-    add_std_freq(true_freq_array)
+    print("x" * 20, audio_input, "x" * 20)
+    add_mean_freq(true_freq_array, frequency_array_length, audio_dict)
+    add_std_freq(true_freq_array, audio_dict)
     add_median_freq(true_freq_array)
     add_quartile_freq(true_freq_array, frequency_array_length)
     add_skewness(true_freq_array)
     add_kurtosis(true_freq_array)
+    add_spectral_flatness(true_freq_array)
+    add_spectral_flux(sound_file_single_channel)
+    add_mode_freq(true_freq_array)
+    add_spectral_centroid(true_freq_array)
 
 
-def add_mean_freq(frequency_array, frequency_array_length):
+def add_mean_freq(frequency_array, frequency_array_length, audio_dict):
     mean_freq = sum(frequency_array) / frequency_array_length
-    print(mean_freq)
+    print("Mean Frequency: ", mean_freq)
+    audio_dict["MeanFreq"] = mean_freq
 
 
 def add_std_freq(frequency_array):
     std_freq = np.std(frequency_array)
-    print(std_freq)
+    print("Standard Deviation Frequency: ", std_freq)
 
 
 def add_median_freq(frequency_array):
     # Median sorts list
     median_freq = np.median(frequency_array)
-    print(median_freq)
+    print("Median Frequency: ", median_freq)
 
 
 def add_quartile_freq(frequency_array, frequency_array_length):
@@ -134,23 +142,58 @@ def add_quartile_freq(frequency_array, frequency_array_length):
     q2_freq = np.median(frequency_array[q3:frequency_array_length])
     iqr_freq = np.median(frequency_array[q1 + 1: q3 - 1])
 
-    print(q1_freq, " ", iqr_freq, " ", q2_freq)
+    print("Q1 Frequency: ", q1_freq, "\nQ2 Frequency: ", iqr_freq, "\nIQR Frequency: ", q2_freq)
 
 
 def add_skewness(frequency_array):
     sound_file_skewness = skew(frequency_array)
-    print(sound_file_skewness)
+    print("Skewness: ", sound_file_skewness)
 
 
 def add_kurtosis(frequency_array):
     sound_file_kurtosis = kurtosis(frequency_array, fisher=True, bias=True)
-    print(sound_file_kurtosis)
+    print("Kurtosis: ", sound_file_kurtosis)
+
+
+def add_spectral_flatness(frequency_array):
+    audio_spectral_flatness = lb.spectral_flatness(frequency_array, power=1)  # 1 is power spectrum
+    print("Spectral Flatness: ", audio_spectral_flatness)
+
+
+# No library for this, doing similar code to https://www.audiocontentanalysis.org/code/audio-features/spectral-flux/
+# But value for this will be largest difference in power difference over time, this could be too simple
+def add_spectral_flux(amplitude_array):
+    max_flux = 0
+    for index, amplitude in enumerate(amplitude_array):
+        if index < len(amplitude_array) - 1:
+            difference = abs(amplitude - amplitude_array[index + 1])
+            if difference > max_flux:
+                max_flux = difference
+
+    print("Spectral Flux: ", max_flux)
+
+
+def add_mode_freq(frequency_array):
+    # Round because otherwise there will rarely be a mode
+    mode_freq = mode(frequency_array.astype(int))
+    print("Mode Frequency :", int(mode_freq[0]))
+
+
+def add_spectral_centroid(frequency_array):
+    audio_spectral_centroid = lb.spectral_centroid(frequency_array)
+    print("Spectral Centroid: ", audio_spectral_centroid)
 
 
 def main():
 
-    amp_to_freq(test_file_1)
-    amp_to_freq(test_file_2)
+    audio_dict = {}
+    dict_list = []
+    amp_to_freq(test_file_1, audio_dict)
+    dict_list.append(copy.deepcopy(audio_dict))
+    print(dict_list)
+    amp_to_freq(test_file_2, audio_dict)
+    dict_list.append(copy.deepcopy(audio_dict))
+    print(dict_list)
 
 
 main()
