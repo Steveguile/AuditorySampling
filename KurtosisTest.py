@@ -104,84 +104,91 @@ def amp_to_freq(audio_input, audio_dict):
     # print("fft_array Length =", len(fft_array))
     # np.savetxt("fftData.txt", fft_array)
 
-    print("x" * 20, audio_input, "x" * 20)
     add_mean_freq(true_freq_array, frequency_array_length, audio_dict)
+    add_median_freq(true_freq_array, audio_dict)
+    add_mode_freq(true_freq_array, audio_dict)
     add_std_freq(true_freq_array, audio_dict)
-    add_median_freq(true_freq_array)
-    add_quartile_freq(true_freq_array, frequency_array_length)
-    add_skewness(true_freq_array)
-    add_kurtosis(true_freq_array)
-    add_spectral_flatness(true_freq_array)
-    add_spectral_flux(sound_file_single_channel)
-    add_mode_freq(true_freq_array)
-    add_spectral_centroid(true_freq_array)
+    add_quartile_freq(true_freq_array, frequency_array_length, audio_dict)
+    add_skewness(true_freq_array, audio_dict)
+    add_kurtosis(true_freq_array, audio_dict)
+    add_spectral_flatness(true_freq_array, audio_dict)
+    add_spectral_centroid(true_freq_array, audio_dict)
+    add_spectral_contrast(true_freq_array, audio_dict) # This may need changing
 
 
 def add_mean_freq(frequency_array, frequency_array_length, audio_dict):
     mean_freq = sum(frequency_array) / frequency_array_length
-    print("Mean Frequency: ", mean_freq)
+    # print("Mean Frequency: ", mean_freq)
     audio_dict["MeanFreq"] = mean_freq
 
 
-def add_std_freq(frequency_array):
-    std_freq = np.std(frequency_array)
-    print("Standard Deviation Frequency: ", std_freq)
-
-
-def add_median_freq(frequency_array):
+def add_median_freq(frequency_array, audio_dict):
     # Median sorts list
     median_freq = np.median(frequency_array)
-    print("Median Frequency: ", median_freq)
+    # print("Median Frequency: ", median_freq)
+    audio_dict["MedFreq"] = median_freq
 
 
-def add_quartile_freq(frequency_array, frequency_array_length):
+def add_mode_freq(frequency_array, audio_dict):
+    # Round down otherwise there will rarely be a mode
+    mode_freq = mode(frequency_array.astype(int))
+    # print("Mode Frequency :", int(mode_freq[0]))
+    audio_dict["ModeFreq"] = int(mode_freq[0])
+
+
+def add_std_freq(frequency_array, audio_dict):
+    std_freq = np.std(frequency_array)
+    # print("Standard Deviation Frequency: ", std_freq)
+    audio_dict["SDF"] = std_freq
+
+
+def add_quartile_freq(frequency_array, frequency_array_length, audio_dict):
     q1 = int(frequency_array_length * 0.25)
     q3 = int(frequency_array_length * 0.75) + 1  # Int rounds down
 
     q1_freq = np.median(frequency_array[0:q1])
-    q2_freq = np.median(frequency_array[q3:frequency_array_length])
+    audio_dict["Q1"] = q1_freq
     iqr_freq = np.median(frequency_array[q1 + 1: q3 - 1])
+    audio_dict["IQR"] = iqr_freq
+    q3_freq = np.median(frequency_array[q3:frequency_array_length])
+    audio_dict["Q3"] = q3_freq
+    # print("Q1 Frequency: ", q1_freq, "\nIQR Frequency: ", iqr_freq, "\nQ3 Frequency: ", q3_freq)
 
-    print("Q1 Frequency: ", q1_freq, "\nQ2 Frequency: ", iqr_freq, "\nIQR Frequency: ", q2_freq)
 
-
-def add_skewness(frequency_array):
+def add_skewness(frequency_array, audio_dict):
     sound_file_skewness = skew(frequency_array)
-    print("Skewness: ", sound_file_skewness)
+    # print("Skewness: ", sound_file_skewness)
+    audio_dict["Skewness"] = sound_file_skewness
 
 
-def add_kurtosis(frequency_array):
+def add_kurtosis(frequency_array, audio_dict):
     sound_file_kurtosis = kurtosis(frequency_array, fisher=True, bias=True)
-    print("Kurtosis: ", sound_file_kurtosis)
+    # print("Kurtosis: ", sound_file_kurtosis)
+    audio_dict["Kurtosis"] = sound_file_kurtosis
 
 
-def add_spectral_flatness(frequency_array):
-    audio_spectral_flatness = lb.spectral_flatness(frequency_array, power=1)  # 1 is power spectrum
-    print("Spectral Flatness: ", audio_spectral_flatness)
+def add_spectral_flatness(frequency_array, audio_dict):
+    flatness = lb.spectral_flatness(frequency_array, power=1)  # 1 is power spectrum
+    for i, band_flatness in enumerate(flatness.tolist()[0]):#
+        # print("SpFlt%s" % (i + 1), band_flatness)
+        audio_dict["SpFlt%s" % (i + 1)] = band_flatness
 
 
-# No library for this, doing similar code to https://www.audiocontentanalysis.org/code/audio-features/spectral-flux/
-# But value for this will be largest difference in power difference over time, this could be too simple
-def add_spectral_flux(amplitude_array):
-    max_flux = 0
-    for index, amplitude in enumerate(amplitude_array):
-        if index < len(amplitude_array) - 1:
-            difference = abs(amplitude - amplitude_array[index + 1])
-            if difference > max_flux:
-                max_flux = difference
-
-    print("Spectral Flux: ", max_flux)
+def add_spectral_centroid(frequency_array, audio_dict):
+    centroid = lb.spectral_centroid(frequency_array)
+    for i, band_centroid in enumerate(centroid.tolist()[0]):
+        # print("Spectral Centroid: ", centroid)
+        audio_dict["SpCen%s" % (i + 1)] = band_centroid
 
 
-def add_mode_freq(frequency_array):
-    # Round because otherwise there will rarely be a mode
-    mode_freq = mode(frequency_array.astype(int))
-    print("Mode Frequency :", int(mode_freq[0]))
+# I think average rows as https://librosa.github.io/librosa/generated/librosa.feature.spectral_contrast.html states
+# "each row of spectral contrast values corresponds to a given octave-based frequency"
+def add_spectral_contrast(frequency_array, audio_dict):
+    contrast = lb.spectral_contrast(frequency_array)
 
+    for i, row in enumerate(contrast.tolist()):
+        audio_dict["SpCon%s" % (i + 1)] = sum(row) / len(row)
 
-def add_spectral_centroid(frequency_array):
-    audio_spectral_centroid = lb.spectral_centroid(frequency_array)
-    print("Spectral Centroid: ", audio_spectral_centroid)
 
 
 def main():
@@ -189,12 +196,18 @@ def main():
     audio_dict = {}
     dict_list = []
     amp_to_freq(test_file_1, audio_dict)
-    dict_list.append(copy.deepcopy(audio_dict))
-    print(dict_list)
+    dict_list.append(copy.deepcopy(audio_dict)) # Need deepcopy or would overwrite previous key value
     amp_to_freq(test_file_2, audio_dict)
     dict_list.append(copy.deepcopy(audio_dict))
-    print(dict_list)
 
+    # Print rows for easy checking
+    for audio_dict in dict_list:
+        print(audio_dict)
+
+
+    #NEED TO DEFAULT DICT KEY VALUE TO "?" after each loop for unknown values for shorter audio clips
+    audio_dict = {x: "?" for x in audio_dict}
+    print(audio_dict)
 
 main()
 
