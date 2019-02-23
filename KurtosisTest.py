@@ -13,7 +13,7 @@ test_file_2 = r"E:\Steve_Files\Work\University\Year 4\Project\My Project\Audio_F
 
 
 # Credit to StackOverflow user Anil_M for his answer on https://stackoverflow.com/questions/43284049/spectrogram-of-a-wave-file
-def amp_to_freq(audio_input, audio_dict):
+def amp_to_freq(audio_input):
     # Read file and get sampling freq [ usually 44100 Hz ]  and sound object
     sampling_frequency, sound_file = read(audio_input)
 
@@ -104,16 +104,8 @@ def amp_to_freq(audio_input, audio_dict):
     # print("fft_array Length =", len(fft_array))
     # np.savetxt("fftData.txt", fft_array)
 
-    add_mean_freq(true_freq_array, frequency_array_length, audio_dict)
-    add_median_freq(true_freq_array, audio_dict)
-    add_mode_freq(true_freq_array, audio_dict)
-    add_std_freq(true_freq_array, audio_dict)
-    add_quartile_freq(true_freq_array, frequency_array_length, audio_dict)
-    add_skewness(true_freq_array, audio_dict)
-    add_kurtosis(true_freq_array, audio_dict)
-    add_spectral_flatness(true_freq_array, audio_dict)
-    add_spectral_centroid(true_freq_array, audio_dict)
-    add_spectral_contrast(true_freq_array, audio_dict) # This may need changing
+    return true_freq_array, frequency_array_length
+
 
 
 def add_mean_freq(frequency_array, frequency_array_length, audio_dict):
@@ -190,14 +182,28 @@ def add_spectral_contrast(frequency_array, audio_dict):
         audio_dict["SpCon%s" % (i + 1)] = sum(row) / len(row)
 
 
+def add_attributes(frequency_array, frequency_array_length, audio_dict):
+
+    add_mean_freq(frequency_array, frequency_array_length, audio_dict)
+    add_median_freq(frequency_array, audio_dict)
+    add_mode_freq(frequency_array, audio_dict)
+    add_std_freq(frequency_array, audio_dict)
+    add_quartile_freq(frequency_array, frequency_array_length, audio_dict)
+    add_skewness(frequency_array, audio_dict)
+    add_kurtosis(frequency_array, audio_dict)
+    add_spectral_flatness(frequency_array, audio_dict)
+    add_spectral_centroid(frequency_array, audio_dict)
+    add_spectral_contrast(frequency_array, audio_dict) # This may need changing
 
 def main():
 
     audio_dict = {}
     dict_list = []
-    amp_to_freq(test_file_1, audio_dict)
+    frequency_array, frequency_array_length = amp_to_freq(test_file_1)
+    add_attributes(frequency_array, frequency_array_length, audio_dict)
     dict_list.append(copy.deepcopy(audio_dict)) # Need deepcopy or would overwrite previous key value
-    amp_to_freq(test_file_2, audio_dict)
+    frequency_array, frequency_array_length = amp_to_freq(test_file_2)
+    add_attributes(frequency_array, frequency_array_length, audio_dict)
     dict_list.append(copy.deepcopy(audio_dict))
 
     # Print rows for easy checking
