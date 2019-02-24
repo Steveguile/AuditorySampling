@@ -2,6 +2,7 @@
 from pydub import AudioSegment
 import os
 from random import *
+# import AttributeGenerator as ag
 
 # File paths
 audio_path_in = r"E:\Steve_Files\Work\University\Year 4\Project\My Project\Audio_Files\Audio_Files_Converted\\"
@@ -49,6 +50,7 @@ def get_crash_audio():
     # audio_segment.export(open(output_path + traffic_incident + "test.wav", "wb"), format="wav")
     return audio_segment, read_file
 
+
 # TODO: Make it so original road audio is never used twice, can be solved by TODO under "Road noise with crash"
 def get_road_audio():
     audio_file = randint(0, len(os.listdir(audio_path_out + no_traffic_incident)))
@@ -57,14 +59,8 @@ def get_road_audio():
 
     return audio, read_file
 
-def main():
 
-    # Road noise without crash slicer
-    for filename in os.listdir(audio_path_in + road_noise):
-        audio = AudioSegment.from_wav(audio_path_in + road_noise + filename)
-        # the_slicer(audio, audio_path_out + no_traffic_incident + filename.split('.')[0]) # TODO: Uncomment
-
-    # Road noise with crash
+def overlay_audio():
     # TODO: Convert this to instead of reading, create a copy + crash when writing initial snipped audio file for performance
     check_dir = os.listdir(audio_path_out + no_traffic_incident)
     crash_audio_quantity = int(len(check_dir) / class_ratio) # How many traffic incidents to overlay
@@ -74,12 +70,23 @@ def main():
         traffic_audio, traffic_filepath = get_road_audio()
 
         traffic_filename = traffic_filepath.rsplit(r"\\", 1)[1].split(".")[0]
-        crash_filename= crash_filepath.rsplit(r"\\", 1)[1].split(".")[0]
+        crash_filename = crash_filepath.rsplit(r"\\", 1)[1].split(".")[0]
 
         overlaid_audio = traffic_audio.overlay(crash_audio)
 
         with open(audio_path_out + traffic_incident + traffic_filename + "&" + crash_filename + ".wav", "wb") as f:
             overlaid_audio.export(f, format="wav")
+
+
+def main():
+
+    # Road noise without crash slicer
+    for filename in os.listdir(audio_path_in + road_noise):
+        audio = AudioSegment.from_wav(audio_path_in + road_noise + filename)
+        the_slicer(audio, audio_path_out + no_traffic_incident + filename.split('.')[0]) # TODO: Uncomment
+
+    # Road noise with crash
+    overlay_audio()
 
 
 main()
