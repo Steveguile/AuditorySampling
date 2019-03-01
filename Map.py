@@ -8,9 +8,6 @@ import winsound
 # Credit for uk-counties JSON goes to https://github.com/deldersveld/topojson
 # Credit for pyodbc assistance goes to StackOverflow users ryguy7272 and Gennon for response on https://stackoverflow.com/questions/33725862/connecting-to-microsoft-sql-server-using-python
 
-noise_test = r"E:\Steve_Files\Work\University\Year 4\Project\My Project\Audio_Files\Audio_Files_Generated\Traffic_Incident\road_noise_1-4&car_crash_9.wav"
-winsound.PlaySound(noise_test, winsound.SND_ASYNC)
-
 connection = pyodbc.connect(
     "Driver={SQL Server Native Client 11.0};"  # move this probably, ignore for now as web app is least important of this
     "Server=DESKTOP-HH0IP9E\PROJECT;"
@@ -24,22 +21,18 @@ tooltip = 'Click for audio'
 
 # Default Location
 m = folium.Map(location=[52.063, -1.533], zoom_start=8) # Center map to UK
-# County Data
+# County Data for colourful map
 county_overlay = os.path.join('data', 'uk-counties.json')
 
 
-# xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx sound bits
-
-# xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
 #Add markers
 for row in cursor:
+    audio_html = "<audio controls><source src=""\"" + row[3] + row[4] + "\""" type=\"audio/" + row[4][1:len(row)] + "\"""></audio>"
     folium.Marker([row[1], row[2]],
-                  popup=folium.Popup(max_width=50), # Add audio to this popup
+                  popup=audio_html,
                   tooltip=tooltip,
                   icon=folium.Icon(color='red', icon='play'),
                   ).add_to(m)
-
 
 
 # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx colour bits
@@ -69,4 +62,6 @@ folium.TopoJson(open(county_overlay),
                 ).add_to(m)
 
 m.save('incident_map.html')
+
+
 
