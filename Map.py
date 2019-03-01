@@ -2,7 +2,7 @@ import folium
 import pyodbc
 import os
 import branca
-import winsound
+from bs4 import BeautifulSoup as soup
 
 # Credit for folium guide goes to https://www.youtube.com/watch?v=4RnU5qKTfYY
 # Credit for uk-counties JSON goes to https://github.com/deldersveld/topojson
@@ -64,4 +64,13 @@ folium.TopoJson(open(county_overlay),
 m.save('incident_map.html')
 
 
+# Add css to folium generated file <link rel="stylesheet" href="leaflet.css"/>
+map_html = soup(open('incident_map.html', 'r'), features="html.parser")
+head = map_html.find('link', {"href":"https://rawcdn.githack.com/python-visualization/folium/master/folium/templates/leaflet.awesome.rotate.css"}) # Insert as last stylesheet
+stylesheet = map_html.new_tag(name='link')
+stylesheet['rel'] = 'stylesheet'
+stylesheet['href'] = 'leaflet.css'
+head.insert_after(stylesheet)
 
+with open('incident_map.html', 'w') as f:
+    f.write(str(map_html))
