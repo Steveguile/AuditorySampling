@@ -184,7 +184,9 @@ def add_spectral_contrast(frequency_array, audio_dict):
         audio_dict["SpCon%s" % (i + 1)] = sum(row) / len(row)
 
 
-def add_attributes(frequency_array, frequency_array_length, audio_dict):
+def add_attributes(frequency_array, frequency_array_length, audio_dict, reference):
+
+    audio_dict["reference"] = reference
 
     add_mean_freq(frequency_array, frequency_array_length, audio_dict)
     add_median_freq(frequency_array, audio_dict)
@@ -208,11 +210,11 @@ def main():
 
             class_attribute = "No"
 
-            if "&" in file_name:
+            if directory == "Traffic_Incident": # TODO This is bad, don't do this
                 class_attribute = "Yes"
 
             frequency_array, frequency_array_length = amp_to_freq(file_path + directory + r"\\" + file_name)
-            add_attributes(frequency_array, frequency_array_length, audio_dict)
+            add_attributes(frequency_array, frequency_array_length, audio_dict, file_name.split('.')[0])
             audio_dict["TrafficIncident"] = class_attribute
             dict_list.append(copy.deepcopy(audio_dict))  # Need deepcopy or would overwrite previous key value
 
