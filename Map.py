@@ -2,7 +2,7 @@ import folium
 import pyodbc
 import os
 import branca
-import winsound
+from bs4 import BeautifulSoup as soup
 
 # Credit for folium guide goes to https://www.youtube.com/watch?v=4RnU5qKTfYY
 # Credit for uk-counties JSON goes to https://github.com/deldersveld/topojson
@@ -25,14 +25,14 @@ m = folium.Map(location=[52.063, -1.533], zoom_start=8) # Center map to UK
 county_overlay = os.path.join('data', 'uk-counties.json')
 
 
-#Add markers
-for row in cursor:
-    audio_html = "<audio controls><source src=""\"" + row[3] + row[4] + "\""" type=\"audio/" + row[4][1:len(row)] + "\"""></audio>"
-    folium.Marker([row[1], row[2]],
-                  popup=audio_html,
-                  tooltip=tooltip,
-                  icon=folium.Icon(color='red', icon='play'),
-                  ).add_to(m)
+def add_markers():
+    for row in cursor:
+        audio_html = "<audio controls><source src=""\"" + row[3] + row[4] + "\""" type=\"audio/" + row[4][1:len(row)] + "\"""></audio>"
+        folium.Marker([row[1], row[2]],
+                      popup=audio_html,
+                      tooltip=tooltip,
+                      icon=folium.Icon(color='red', icon='play'),
+                      ).add_to(m)
 
 
 # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx colour bits
@@ -43,6 +43,7 @@ def style_function(feature): # Don't actually care about the feature
         'weight': 0.3,
         'fillColor': colour
     }
+
 
 def awful_colour_thing(feature):
     scale = 4000
@@ -55,13 +56,30 @@ def awful_colour_thing(feature):
 # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
-# Add overlay
-folium.TopoJson(open(county_overlay),
-                object_path='objects.GBR_adm2',
-                style_function=style_function
-                ).add_to(m)
+def county_plot():
+    folium.TopoJson(open(county_overlay),
+                    object_path='objects.GBR_adm2',
+                    style_function=style_function
+                    ).add_to(m)
 
-m.save('incident_map.html')
+    m.save('incident_map.html')
 
 
+def add_stylesheet():
+    # Add css to folium generated file <link rel="stylesheet" href="leaflet.css"/>
+    map_html = soup(open('incident_map.html', 'r'), features="html.parser")
+    head = map_html.find('link', {"href":"https://rawcdn.githack.com/python-visualization/folium/master/folium/templates/leaflet.awesome.rotate.css"}) # Insert as last stylesheet
+    stylesheet = map_html.new_tag(name='link')
+    stylesheet['rel'] = 'stylesheet'
+    stylesheet['href'] = 'leaflet.css'
+    head.insert_after(stylesheet)
 
+    with open('incident_map.html', 'w') as f:
+        f.write(str(map_html))
+
+
+def main():
+
+    add_markers()
+    county_plot()
+    add_stylesheet()

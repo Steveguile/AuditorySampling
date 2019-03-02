@@ -1,0 +1,18 @@
+/* Don't worry too much about css audio player, make it look fine for chrome until everything else is finished */
+
+.leaflet-popup-content-wrapper {
+    background-color: #F0F3F3;
+    padding-top: 0;
+    height: 54px;
+    width: 340px;
+}
+
+.leaflet-popup-tip {
+    background-color: #F0F3F3;
+}
+
+.leaflet-popup-close-button {
+    background-color: #000000;
+    margin-top: 15px;
+    margin-right: 5px;
+}
