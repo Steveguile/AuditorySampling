@@ -7,10 +7,17 @@ from librosa import feature as lb
 import copy
 import os
 import csv
+import re
 
 # np.set_printoptions(threshold=np.inf)
 
 file_path = r"E:\Steve_Files\Work\University\Year 4\Project\My Project\Audio_Files\Audio_Files_Generated\\"
+
+
+#Credit to StackOverflow user Constntinius for his answer on https://stackoverflow.com/questions/13497891/python-getting-around-division-by-zero
+def safe_ln(x, min_val=0.000000000000000001): # Replace any zeros with very small value to avoid / 0
+    return 10 * np.log10(x.clip(min=min_val))
+
 
 # Credit to StackOverflow user Anil_M for his answer on https://stackoverflow.com/questions/43284049/spectrogram-of-a-wave-file
 def amp_to_freq(audio_input):
@@ -87,7 +94,7 @@ def amp_to_freq(audio_input):
 
     frequency_array = np.arange(0, number_unique_points, 1.0) * (sampling_frequency / sound_file_length)
 
-    true_freq_array = 10 * np.log10(fft_array)
+    true_freq_array = safe_ln(fft_array)
 
     # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx Plot the frequency
     # plt.plot(frequency_array/1000, true_freq_array, color='B')
@@ -106,8 +113,7 @@ def amp_to_freq(audio_input):
     # print("fft_array Length =", len(fft_array))
     # np.savetxt("fftData.txt", fft_array)
 
-    return true_freq_array, frequency_array_length
-
+    return true_freq_array, frequency_array_length, sampling_frequency
 
 
 def add_mean_freq(frequency_array, frequency_array_length, audio_dict):
@@ -168,8 +174,8 @@ def add_spectral_flatness(frequency_array, audio_dict):
         audio_dict["SpFlt%s" % (i + 1)] = band_flatness
 
 
-def add_spectral_centroid(frequency_array, audio_dict):
-    centroid = lb.spectral_centroid(frequency_array)
+def add_spectral_centroid(frequency_array, audio_dict, sample_rate):
+    centroid = lb.spectral_centroid(frequency_array, sample_rate)
     for i, band_centroid in enumerate(centroid.tolist()[0]):
         # print("Spectral Centroid: ", centroid)
         audio_dict["SpCen%s" % (i + 1)] = band_centroid
@@ -179,12 +185,11 @@ def add_spectral_centroid(frequency_array, audio_dict):
 # "each row of spectral contrast values corresponds to a given octave-based frequency"
 def add_spectral_contrast(frequency_array, audio_dict):
     contrast = lb.spectral_contrast(frequency_array)
-
     for i, row in enumerate(contrast.tolist()):
         audio_dict["SpCon%s" % (i + 1)] = sum(row) / len(row)
 
 
-def add_attributes(frequency_array, frequency_array_length, audio_dict, reference):
+def add_attributes(frequency_array, frequency_array_length, audio_dict, reference, sample_rate):
 
     audio_dict["reference"] = reference
 
@@ -196,7 +201,7 @@ def add_attributes(frequency_array, frequency_array_length, audio_dict, referenc
     add_skewness(frequency_array, audio_dict)
     add_kurtosis(frequency_array, audio_dict)
     add_spectral_flatness(frequency_array, audio_dict)
-    add_spectral_centroid(frequency_array, audio_dict)
+    add_spectral_centroid(frequency_array, audio_dict, sample_rate)
     add_spectral_contrast(frequency_array, audio_dict) # This may need changing
 
 
@@ -213,8 +218,8 @@ def main():
             if directory == "Traffic_Incident": # TODO This is bad, don't do this
                 class_attribute = "Yes"
 
-            frequency_array, frequency_array_length = amp_to_freq(file_path + directory + r"\\" + file_name)
-            add_attributes(frequency_array, frequency_array_length, audio_dict, file_name.split('.')[0])
+            frequency_array, frequency_array_length, sample_rate = amp_to_freq(file_path + directory + r"\\" + file_name)
+            add_attributes(frequency_array, frequency_array_length, audio_dict, file_name.split('.')[0], sample_rate)
             audio_dict["TrafficIncident"] = class_attribute
             dict_list.append(copy.deepcopy(audio_dict))  # Need deepcopy or would overwrite previous key value
 
@@ -222,16 +227,63 @@ def main():
             audio_dict = {x: "?" for x in audio_dict}
 
 
-    # Print rows for easy checking
-    for audio_dict in dict_list:
-        print(audio_dict)
-
     dict_keys = dict_list[0].keys()
+
+    # TODO:  highest and lowest flatness and centroids as there's so many
+    # Credit to StackOverflow user Sven Marnach for answer on https://stackoverflow.com/questions/4843158/check-if-a-python-list-item-contains-a-string-inside-another-string
+    SpFlt = [s for s in dict_keys if "SpFlt" in s]
+    SpCen = [s for s in dict_keys if "SpCen" in s]
+
+    max_val = 0
+    min_val = 50000000 # Will never be larger than this
+    output_list = []
+
+    for audio_dict in dict_list:
+        for flatness in SpFlt:
+            if audio_dict[flatness] > max_val:
+                max_val = audio_dict[flatness]
+            elif audio_dict[flatness] < min_val:
+                min_val = audio_dict[flatness]
+
+            audio_dict["MaxSpFlt"] = max_val
+            audio_dict["MinSpFlt"] = min_val
+
+            del audio_dict[flatness] # Remove key
+
+        max_val = 0
+        min_val = 50000000
+
+        for centroid in SpCen:
+            if audio_dict[centroid] > max_val:
+                max_val = audio_dict[centroid]
+            elif audio_dict[centroid] < min_val:
+                min_val = audio_dict[centroid]
+
+            audio_dict["MaxSpCen"] = max_val
+            audio_dict["MinSpCen"] = min_val
+
+            del audio_dict[centroid] # Remove key
+
+        max_val = 0
+        min_val = 50000000
+
+        # Sometimes get added SpFlt and SpCen for some reason, can't figure out why as all should have same bands so just remove
+        extra_keys = [key for key in audio_dict if "SpFlt" in key or "SpCen" in key]
+        for key in extra_keys:
+            if bool(re.search(r'\d', key)):
+                del audio_dict[key]
+
+        # Put label on end of dict
+        target_val = audio_dict["TrafficIncident"]
+        audio_dict.pop("TrafficIncident")
+        audio_dict["TrafficIncident"] = target_val
+
+        output_list.append(copy.deepcopy(audio_dict))
 
     with open(r"E:\Programming\Projects\Dissertation\SyntheticDataGenerator\traffic_audio.csv", "w", newline='') as f:
         dict_writer = csv.DictWriter(f, dict_keys)
         dict_writer.writeheader()
-        dict_writer.writerows(dict_list)
+        dict_writer.writerows(output_list)
 
 main()
 

@@ -26,7 +26,7 @@ traffic_incident = r"\Traffic_Incident\\"
 
 # xxxxxxxxxxxxxxxxxxxxx Configure Parameters xxxxxxxxxxxxxxxxxxxxx
 max_from_source = 50
-audio_length = 100 # 100ms chunks
+audio_length = 3 * 1000 # 3 second audio
 class_ratio = 10 # How many traffic accident clips vs non-traffic accident clips
 # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -44,7 +44,7 @@ def the_slicer():
 def get_crash_audio():
     audio_file = randint(0, len(os.listdir(audio_path_in + added_audio)))
     read_file = audio_path_in + added_audio + os.listdir((audio_path_in + added_audio))[audio_file - 1]
-    audio = AudioSegment.from_wav(read_file)
+    audio = AudioSegment.from_wav(read_file) - 15 # Always reduce as incidents are much louder than normal audio
 
     if len(audio) > audio_length:
         random_start_point = randint(0, len(audio) - audio_length) # Always allow for audio length parameter
