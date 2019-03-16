@@ -1,3 +1,5 @@
 venv/
-venv/Lib/site-packages
 traffic_audio.csv
+data/audio/*
+!data/audio/Description.txt
+incident_map.html

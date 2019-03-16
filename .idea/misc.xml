@@ -4,8 +4,12 @@
     <option name="languageLevel" value="ES6" />
   </component>
 <<<<<<< HEAD
+<<<<<<< HEAD
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.7 (SyntheticDataGenerator) (2)" project-jdk-type="Python SDK" />
 =======
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.7 (DataMiner)" project-jdk-type="Python SDK" />
 >>>>>>> DataMiner/master
+=======
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.7 (venv) (2)" project-jdk-type="Python SDK" />
+>>>>>>> WebApp/master
 </project>
