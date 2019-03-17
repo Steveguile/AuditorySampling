@@ -9,7 +9,7 @@ import random
 
 # File paths
 audio_path_in = r"E:\Steve_Files\Work\University\Year 4\Project\My Project\Audio_Files\Audio_Files_Converted\\"
-audio_path_out = r"E:\Steve_Files\Work\University\Year 4\Project\My Project\Audio_Files\Audio_Files_Generated\\"
+audio_path_out = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data\audio")
 
 # Input Folder Names (Can be changed for anything)
 road_noise = r"\Road_Noise\\"

@@ -10,6 +10,7 @@ from copy import deepcopy
 
 warnings.filterwarnings(action="ignore", category=exceptions.UndefinedMetricWarning) # If it's 0 that's fine
 
+csv_path = r"E:\Programming\Projects\Dissertation\SyntheticDataGenerator\traffic_audio.csv"
 
 
 def perform_cv(dataset, target, classifier, parameters, scorers):
@@ -58,7 +59,7 @@ def perform_cv(dataset, target, classifier, parameters, scorers):
 
 def main():
 
-    csv_file = pd.read_csv(r"E:\Programming\Projects\Dissertation\SyntheticDataGenerator\traffic_audio.csv", header=0)
+    csv_file = pd.read_csv(csv_path, header=0)
     csv_headers = list(csv_file.columns.values)
     dataset = csv_file.drop("reference", axis=1)
     headers = list(dataset.columns.values)

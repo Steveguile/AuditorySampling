@@ -8,10 +8,13 @@ import copy
 import os
 import csv
 import re
+import random
+import geopip
 
 # np.set_printoptions(threshold=np.inf)
 
 file_path = r"E:\Steve_Files\Work\University\Year 4\Project\My Project\Audio_Files\Audio_Files_Generated\\"
+output_file = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data\traffic_audio.csv")
 
 
 #Credit to StackOverflow user Constntinius for his answer on https://stackoverflow.com/questions/13497891/python-getting-around-division-by-zero
@@ -204,30 +207,7 @@ def add_attributes(frequency_array, frequency_array_length, audio_dict, referenc
     add_spectral_centroid(frequency_array, audio_dict, sample_rate)
     add_spectral_contrast(frequency_array, audio_dict) # This may need changing
 
-
-def main():
-
-    audio_dict = {}
-    dict_list = []
-
-    for directory in os.listdir(file_path):
-        for file_name in os.listdir(file_path + directory):
-
-            class_attribute = "No"
-
-            if directory == "Traffic_Incident": # TODO This is bad, don't do this
-                class_attribute = "Yes"
-
-            frequency_array, frequency_array_length, sample_rate = amp_to_freq(file_path + directory + r"\\" + file_name)
-            add_attributes(frequency_array, frequency_array_length, audio_dict, file_name.split('.')[0], sample_rate)
-            audio_dict["TrafficIncident"] = class_attribute
-            dict_list.append(copy.deepcopy(audio_dict))  # Need deepcopy or would overwrite previous key value
-
-            # NEED TO DEFAULT DICT KEY VALUE TO "?" after each loop for unknown values for shorter audio clips
-            audio_dict = {x: "?" for x in audio_dict}
-
-
-    dict_keys = dict_list[0].keys()
+def modify_sp_attributes(dict_list, dict_keys):
 
     # TODO:  highest and lowest flatness and centroids as there's so many
     # Credit to StackOverflow user Sven Marnach for answer on https://stackoverflow.com/questions/4843158/check-if-a-python-list-item-contains-a-string-inside-another-string
@@ -280,10 +260,71 @@ def main():
 
         output_list.append(copy.deepcopy(audio_dict))
 
-    with open(r"E:\Programming\Projects\Dissertation\SyntheticDataGenerator\traffic_audio.csv", "w", newline='') as f:
-        dict_writer = csv.DictWriter(f, dict_keys)
-        dict_writer.writeheader()
-        dict_writer.writerows(output_list)
+    return output_list
+
+
+# Get a coordinate somewhere in UK borders
+def coord_data():
+    # UK borders exist somewhere between -8.5 to 2.2 (latitude) and 49.5 to 60 (longitude)
+    Lat = random.uniform(49.5, 60)
+    Long = random.uniform(-8.5, 2.2)
+    coord = geopip.search(lat=Lat, lng=Long)
+
+    # Lovely bit of recursion
+    if coord is None:
+        coord_data()
+    elif coord["FIPS"] == 'UK':
+        print(coord)
+        print("Method: ",Lat, Long)
+        return Lat, Long
+    else:
+        return 1, 2
+
+    return 2, 3
+
+def main():
+
+    audio_dict = {}
+    dict_list = []
+
+    for directory in os.listdir(file_path):
+        for file_name in os.listdir(file_path + directory):
+
+            class_attribute = "No"
+
+            if directory == "Traffic_Incident": # TODO This is bad, don't do this
+                class_attribute = "Yes"
+
+            frequency_array, frequency_array_length, sample_rate = amp_to_freq(file_path + directory + r"\\" + file_name)
+            add_attributes(frequency_array, frequency_array_length, audio_dict, file_name.split('.')[0], sample_rate)
+            audio_dict["TrafficIncident"] = class_attribute
+            dict_list.append(copy.deepcopy(audio_dict))  # Need deepcopy or would overwrite previous key value
+
+            # NEED TO DEFAULT DICT KEY VALUE TO "?" after each loop for unknown values for shorter audio clips
+            audio_dict = {x: "?" for x in audio_dict}
+
+
+    dict_keys = dict_list[0].keys()
+    output_list = modify_sp_attributes(dict_list, dict_keys)
+
+    #with open(output_file, "w", newline='') as f:
+    #    dict_writer = csv.DictWriter(f, dict_keys)
+    #    dict_writer.writeheader()
+    #    dict_writer.writerows(output_list)
+
+    audio_dict = {}
+    dict_list=[]
+
+    for dict in output_list:
+        audio_dict["Reference"] = dict["reference"]
+        X, Y = coord_data()
+        audio_dict["XCoord"] = X
+        audio_dict["YCoord"] = Y
+        audio_dict["Directory"] = file_path
+        audio_dict["FileType"] = ".wav" # for now
+        dict_list.append(copy.deepcopy(audio_dict))  # Need deepcopy or would overwrite previous key value
+
+    print(dict_list)
 
 main()
 

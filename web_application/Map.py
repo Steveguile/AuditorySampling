@@ -22,7 +22,7 @@ tooltip = 'Click for audio'
 # Default Location
 m = folium.Map(location=[52.063, -1.533], zoom_start=8) # Center map to UK
 # County Data for colourful map
-county_overlay = os.path.join('data', 'uk-counties.json')
+county_overlay = os.path.join('data\map_data', 'uk-counties.json')
 
 
 def add_markers():

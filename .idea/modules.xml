@@ -2,15 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-<<<<<<< HEAD
-<<<<<<< HEAD
-      <module fileurl="file://$PROJECT_DIR$/.idea/SyntheticDataGenerator.iml" filepath="$PROJECT_DIR$/.idea/SyntheticDataGenerator.iml" />
-=======
-      <module fileurl="file://$PROJECT_DIR$/.idea/DataMiner.iml" filepath="$PROJECT_DIR$/.idea/DataMiner.iml" />
->>>>>>> DataMiner/master
-=======
-      <module fileurl="file://$PROJECT_DIR$/.idea/Map.iml" filepath="$PROJECT_DIR$/.idea/Map.iml" />
->>>>>>> WebApp/master
+      <module fileurl="file://$PROJECT_DIR$/.idea/AuditorySampling.iml" filepath="$PROJECT_DIR$/.idea/AuditorySampling.iml" />
     </modules>
   </component>
 </project>
