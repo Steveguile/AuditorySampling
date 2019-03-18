@@ -1,5 +1,6 @@
 venv/
-traffic_audio.csv
+data/traffic_audio.csv
+data/audio_files.csv
 data/audio/*
 !data/audio/Description.txt
 incident_map.html

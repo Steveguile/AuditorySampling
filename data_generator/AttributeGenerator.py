@@ -13,8 +13,12 @@ import geopip
 
 # np.set_printoptions(threshold=np.inf)
 
-file_path = r"E:\Steve_Files\Work\University\Year 4\Project\My Project\Audio_Files\Audio_Files_Generated\\"
-output_file = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data\traffic_audio.csv")
+file_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data\audio")
+output_file = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data")
+
+# Output Folder Names (Can be changed for anything)
+no_traffic_incident = r"No_Traffic_Incident\\"
+traffic_incident = r"Traffic_Incident\\"
 
 
 #Credit to StackOverflow user Constntinius for his answer on https://stackoverflow.com/questions/13497891/python-getting-around-division-by-zero
@@ -270,17 +274,14 @@ def coord_data():
     Long = random.uniform(-8.5, 2.2)
     coord = geopip.search(lat=Lat, lng=Long)
 
-    # Lovely bit of recursion
+    # Fancied doing some recursion, not optimal over while loop though
     if coord is None:
-        coord_data()
+        return coord_data()
     elif coord["FIPS"] == 'UK':
-        print(coord)
-        print("Method: ",Lat, Long)
         return Lat, Long
     else:
-        return 1, 2
+        return coord_data()
 
-    return 2, 3
 
 def main():
 
@@ -288,14 +289,14 @@ def main():
     dict_list = []
 
     for directory in os.listdir(file_path):
-        for file_name in os.listdir(file_path + directory):
+        for file_name in os.listdir(os.path.join(file_path, directory)):
 
             class_attribute = "No"
 
             if directory == "Traffic_Incident": # TODO This is bad, don't do this
                 class_attribute = "Yes"
 
-            frequency_array, frequency_array_length, sample_rate = amp_to_freq(file_path + directory + r"\\" + file_name)
+            frequency_array, frequency_array_length, sample_rate = amp_to_freq(os.path.join(file_path, directory) + r"\\" + file_name)
             add_attributes(frequency_array, frequency_array_length, audio_dict, file_name.split('.')[0], sample_rate)
             audio_dict["TrafficIncident"] = class_attribute
             dict_list.append(copy.deepcopy(audio_dict))  # Need deepcopy or would overwrite previous key value
@@ -307,24 +308,35 @@ def main():
     dict_keys = dict_list[0].keys()
     output_list = modify_sp_attributes(dict_list, dict_keys)
 
-    #with open(output_file, "w", newline='') as f:
-    #    dict_writer = csv.DictWriter(f, dict_keys)
-    #    dict_writer.writeheader()
-    #    dict_writer.writerows(output_list)
+    with open(os.path.join(output_file, "traffic_audio.csv"), "w", newline='') as f:
+        dict_writer = csv.DictWriter(f, dict_keys)
+        dict_writer.writeheader()
+        dict_writer.writerows(output_list)
 
     audio_dict = {}
     dict_list=[]
 
     for dict in output_list:
         audio_dict["Reference"] = dict["reference"]
-        X, Y = coord_data()
-        audio_dict["XCoord"] = X
-        audio_dict["YCoord"] = Y
-        audio_dict["Directory"] = file_path
+        x, y = coord_data()
+        audio_dict["XCoord"] = x
+        audio_dict["YCoord"] = y
+
+        if os.path.isfile(os.path.join(file_path, no_traffic_incident, audio_dict["Reference"]) + ".wav"):
+          audio_dict["Directory"] = os.path.join(file_path, no_traffic_incident, audio_dict["Reference"])
+        else:
+          audio_dict["Directory"] = os.path.join(file_path, traffic_incident, audio_dict["Reference"])
+
         audio_dict["FileType"] = ".wav" # for now
         dict_list.append(copy.deepcopy(audio_dict))  # Need deepcopy or would overwrite previous key value
 
-    print(dict_list)
+
+    dict_keys = dict_list[0].keys()
+
+    with open(os.path.join(output_file, "audio_files.csv"), "w", newline='') as f:
+        dict_writer = csv.DictWriter(f, dict_keys)
+        dict_writer.writeheader()
+        dict_writer.writerows(dict_list)
 
 main()
 
