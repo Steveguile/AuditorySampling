@@ -13,12 +13,14 @@ import geopip
 
 # np.set_printoptions(threshold=np.inf)
 
-file_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data\audio")
+audio_sub_dir = r"data/audio"
+
+file_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], audio_sub_dir)
 output_file = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data")
 
 # Output Folder Names (Can be changed for anything)
-no_traffic_incident = r"No_Traffic_Incident\\"
-traffic_incident = r"Traffic_Incident\\"
+no_traffic_incident = r"No_Traffic_Incident"
+traffic_incident = r"Traffic_Incident"
 
 
 #Credit to StackOverflow user Constntinius for his answer on https://stackoverflow.com/questions/13497891/python-getting-around-division-by-zero
@@ -323,9 +325,9 @@ def main():
         audio_dict["YCoord"] = y
 
         if os.path.isfile(os.path.join(file_path, no_traffic_incident, audio_dict["Reference"]) + ".wav"):
-          audio_dict["Directory"] = os.path.join(file_path, no_traffic_incident, audio_dict["Reference"])
+          audio_dict["Directory"] = os.path.join(audio_sub_dir, no_traffic_incident, audio_dict["Reference"])
         else:
-          audio_dict["Directory"] = os.path.join(file_path, traffic_incident, audio_dict["Reference"])
+          audio_dict["Directory"] = os.path.join(audio_sub_dir, traffic_incident, audio_dict["Reference"])
 
         audio_dict["FileType"] = ".wav" # for now
         dict_list.append(copy.deepcopy(audio_dict))  # Need deepcopy or would overwrite previous key value

@@ -3,36 +3,53 @@ import pyodbc
 import os
 import branca
 from bs4 import BeautifulSoup as soup
+import pandas as pd
 
 # Credit for folium guide goes to https://www.youtube.com/watch?v=4RnU5qKTfYY
 # Credit for uk-counties JSON goes to https://github.com/deldersveld/topojson
 # Credit for pyodbc assistance goes to StackOverflow users ryguy7272 and Gennon for response on https://stackoverflow.com/questions/33725862/connecting-to-microsoft-sql-server-using-python
 
-connection = pyodbc.connect(
-    "Driver={SQL Server Native Client 11.0};"  # move this probably, ignore for now as web app is least important of this
-    "Server=DESKTOP-HH0IP9E\PROJECT;"
-    "Database=WebApp;"
-    "Trusted_Connection=yes;")
+# db or csv
+read_type = 'csv'
 
-cursor = connection.cursor()
-cursor.execute('SELECT * FROM dbo.Audio')
+if read_type == 'db':
+    connection = pyodbc.connect(
+        "Driver={SQL Server Native Client 11.0};"  # move this probably, ignore for now as web app is least important of this
+        "Server=DESKTOP-HH0IP9E\PROJECT;"
+        "Database=WebApp;"
+        "Trusted_Connection=yes;")
+
+    cursor = connection.cursor()
+    cursor.execute('SELECT * FROM dbo.Audio')
+elif read_type == 'csv':
+    input_file = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data\audio_files.csv")
+    cursor = pd.read_csv(input_file, header=0)
 
 tooltip = 'Click for audio'
 
 # Default Location
 m = folium.Map(location=[52.063, -1.533], zoom_start=8) # Center map to UK
 # County Data for colourful map
-county_overlay = os.path.join('data\map_data', 'uk-counties.json')
+county_overlay = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], 'data\map_data', 'uk-counties.json')
 
 
 def add_markers():
-    for row in cursor:
-        audio_html = "<audio controls><source src=""\"" + row[3] + row[4] + "\""" type=\"audio/" + row[4][1:len(row)] + "\"""></audio>"
-        folium.Marker([row[1], row[2]],
-                      popup=audio_html,
-                      tooltip=tooltip,
-                      icon=folium.Icon(color='red', icon='play'),
-                      ).add_to(m)
+    if read_type == 'db':
+        for row in cursor:
+            audio_html = "<audio controls><source src=../" + row[3].replace("\\", "/") + row[4] + "/"" type=/audio/" + row[4][1:len(row)] + "/""></audio>"
+            folium.Marker([row[1], row[2]],
+                          popup=audio_html,
+                          tooltip=tooltip,
+                          icon=folium.Icon(color='red', icon='play'),
+                          ).add_to(m)
+    elif read_type == 'csv':
+        for row in cursor.get_values():
+            audio_html = "<audio controls><source src=../" + row[3].replace("\\", "/") + row[4] + " type=audio/" + row[4][1:len(row)] + "></audio>"
+            folium.Marker([row[1], row[2]],
+                          popup=audio_html,
+                          tooltip=tooltip,
+                          icon=folium.Icon(color='red', icon='play'),
+                          ).add_to(m)
 
 
 # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx colour bits
@@ -83,3 +100,5 @@ def main():
     add_markers()
     county_plot()
     add_stylesheet()
+
+main()
