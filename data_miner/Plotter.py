@@ -36,3 +36,6 @@ def pairwise_scatter():
     # f = fig.suptitle('Wine Attributes Pairwise Plots', fontsize=14)
 
     plt.show()
+
+heat_map()
+pairwise_scatter()
