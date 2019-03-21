@@ -107,13 +107,12 @@ def main():
                   'svc': {'gamma': [0.001],
                           'C': [100.]
                           },
-                  'tree': {'': []},
                   'tree': {'max_features': [5]}
                   }
 
     # Make own SCORERS as need different pos_label
     class_accuracy = make_scorer(accuracy_score)
-    pos_label = 'Yes'
+    pos_label = 'No'
     precision = make_scorer(precision_score, pos_label=pos_label)
     recall = make_scorer(recall_score, pos_label=pos_label)
     f_score = make_scorer(f1_score, pos_label=pos_label)

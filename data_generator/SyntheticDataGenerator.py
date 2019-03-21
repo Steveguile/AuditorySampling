@@ -1,7 +1,7 @@
 
 from pydub import AudioSegment
 import os
-from random import randint
+from random import randint, uniform
 import string
 import random
 
@@ -27,8 +27,23 @@ traffic_incident = r"\Traffic_Incident\\"
 # xxxxxxxxxxxxxxxxxxxxx Configure Parameters xxxxxxxxxxxxxxxxxxxxx
 max_from_source = 50
 audio_length = 3 * 1000 # 3 second audio
-class_ratio = 10 # How many traffic accident clips vs non-traffic accident clips
+class_ratio = 10 # How many traffic accident clips vs non-traffic accident clips (1 = 1:1, 2 = 2:1, n = n:1)
+min_crash_length = 2 * 1000 # 2 second crash length is minimum
 # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+# Credit to StackOverflow user abhi krishnan for answer to question https://stackoverflow.com/questions/51434897/how-to-change-audio-playback-speed-using-pydub
+def speed_change(sound, speed=1.0):
+    # Manually override the frame_rate. This tells the computer how many
+    # samples to play per second
+    sound_with_altered_frame_rate = sound._spawn(sound.raw_data, overrides={
+         "frame_rate": int(sound.frame_rate * speed)
+      })
+     # convert the sound with altered frame rate to a standard frame rate
+     # so that regular playback programs will work right. They often only
+     # know how to play audio at standard frame rate (like 44.1k)
+    return sound_with_altered_frame_rate.set_frame_rate(sound.frame_rate)
+
 
 def the_slicer():
     for filename in os.listdir(audio_path_in + road_noise):
@@ -44,11 +59,18 @@ def the_slicer():
 def get_crash_audio():
     audio_file = randint(0, len(os.listdir(audio_path_in + added_audio)))
     read_file = audio_path_in + added_audio + os.listdir((audio_path_in + added_audio))[audio_file - 1]
-    audio = AudioSegment.from_wav(read_file) - 15 # Always reduce as incidents are much louder than normal audio
+    audio = AudioSegment.from_wav(read_file) - randint(15, 25) # Always reduce as incidents are much louder than normal audio, 15-25db seems suitable
+
+    # Do 1 of 3: 1 - Stretch audio, 3 - Reverse audio, else - Leave audio as is
+    option = randint(1,4)
+    if option == 1:
+        audio = speed_change(audio, uniform(0.1, 1.1))
+    elif option == 2:
+        audio = audio.reverse()
 
     if len(audio) > audio_length:
         random_start_point = randint(0, len(audio) - audio_length) # Always allow for audio length parameter
-        audio_segment = audio[random_start_point : random_start_point + audio_length]
+        audio_segment = audio[random_start_point : random_start_point + randint(min_crash_length, audio_length)]
     else:
         audio_segment = audio
 
