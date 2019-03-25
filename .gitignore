@@ -4,3 +4,5 @@ data/audio_files.csv
 data/audio/*
 !data/audio/Description.txt
 incident_map.html
+data/incorrect_predictions.csv
+data/performance_scores.csv

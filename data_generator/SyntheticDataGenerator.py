@@ -25,9 +25,9 @@ traffic_incident = r"\Traffic_Incident\\"
 # last_5_seconds = audio[-5000:]
 
 # xxxxxxxxxxxxxxxxxxxxx Configure Parameters xxxxxxxxxxxxxxxxxxxxx
-max_from_source = 50
+max_from_source = 500
 audio_length = 3 * 1000 # 3 second audio
-class_ratio = 10 # How many traffic accident clips vs non-traffic accident clips (1 = 1:1, 2 = 2:1, n = n:1)
+class_ratio = 1 # How many traffic accident clips vs non-traffic accident clips (1 = 1:1, 2 = 2:1, n = n:1)
 min_crash_length = 2 * 1000 # 2 second crash length is minimum
 # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 

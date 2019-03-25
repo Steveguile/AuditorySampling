@@ -1,9 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
 
 
-csv_file = pd.read_csv(r"E:\Programming\Projects\Dissertation\SyntheticDataGenerator\traffic_audio.csv", header=0)
+csv_file = pd.read_csv(os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], "data/traffic_audio.csv"), header=0)
 csv_headers = list(csv_file.columns.values)
 dataset = csv_file.drop("reference", axis=1)
 headers = list(dataset.columns.values)

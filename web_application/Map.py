@@ -4,6 +4,7 @@ import os
 import branca
 from bs4 import BeautifulSoup as soup
 import pandas as pd
+from folium.plugins import MarkerCluster
 
 # Credit for folium guide goes to https://www.youtube.com/watch?v=4RnU5qKTfYY
 # Credit for uk-counties JSON goes to https://github.com/deldersveld/topojson
@@ -29,6 +30,7 @@ tooltip = 'Click for audio'
 
 # Default Location
 m = folium.Map(location=[52.063, -1.533], zoom_start=8) # Center map to UK
+marker_cluster = MarkerCluster().add_to(m)
 # County Data for colourful map
 county_overlay = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], 'data\map_data', 'uk-counties.json')
 
@@ -41,7 +43,7 @@ def add_markers():
                           popup=audio_html,
                           tooltip=tooltip,
                           icon=folium.Icon(color='red', icon='play'),
-                          ).add_to(m)
+                          ).add_to(marker_cluster)
     elif read_type == 'csv':
         for row in cursor.get_values():
             audio_html = "<audio controls><source src=../" + row[3].replace("\\", "/") + row[4] + " type=audio/" + row[4][1:len(row)] + "></audio>"
@@ -49,7 +51,7 @@ def add_markers():
                           popup=audio_html,
                           tooltip=tooltip,
                           icon=folium.Icon(color='red', icon='play'),
-                          ).add_to(m)
+                          ).add_to(marker_cluster)
 
 
 # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx colour bits

@@ -315,30 +315,6 @@ def main():
         dict_writer.writeheader()
         dict_writer.writerows(output_list)
 
-    audio_dict = {}
-    dict_list=[]
-
-    for dict in output_list:
-        audio_dict["Reference"] = dict["reference"]
-        x, y = coord_data()
-        audio_dict["XCoord"] = x
-        audio_dict["YCoord"] = y
-
-        if os.path.isfile(os.path.join(file_path, no_traffic_incident, audio_dict["Reference"]) + ".wav"):
-          audio_dict["Directory"] = os.path.join(audio_sub_dir, no_traffic_incident, audio_dict["Reference"])
-        else:
-          audio_dict["Directory"] = os.path.join(audio_sub_dir, traffic_incident, audio_dict["Reference"])
-
-        audio_dict["FileType"] = ".wav" # for now
-        dict_list.append(copy.deepcopy(audio_dict))  # Need deepcopy or would overwrite previous key value
-
-
-    dict_keys = dict_list[0].keys()
-
-    with open(os.path.join(output_file, "audio_files.csv"), "w", newline='') as f:
-        dict_writer = csv.DictWriter(f, dict_keys)
-        dict_writer.writeheader()
-        dict_writer.writerows(dict_list)
 
 main()
 
