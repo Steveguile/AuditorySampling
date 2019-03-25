@@ -174,7 +174,7 @@ def main():
                 result_list.append(result)
 
     for result in result_list:
-        if result[0].get('i') == -1:
+        if result[0].get('i') == -1: # - 1 default for one-time used classifiers (1 set of params)
             output_list.append(copy.deepcopy(result[0].get('Content')))
         else:
             for my_list in result:

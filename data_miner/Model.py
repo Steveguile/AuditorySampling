@@ -17,7 +17,6 @@ model_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], "data/mod
 out_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], 'data')
 
 file_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], audio_sub_dir)
-output_file = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data")
 
 # Output Folder Names (Can be changed for anything)
 no_traffic_incident = r"No_Traffic_Incident"
@@ -31,7 +30,7 @@ def display_tree(classifier, headers, target):
 
     graph = graphviz.graph_from_dot_data(dot_data)
 
-    graph.write_png(out_path + model_name + '.png')
+    graph.write_png(os.path.join(out_path, model_name + '.png'))
 
 
 def to_csv(file, keys, dict_list):
