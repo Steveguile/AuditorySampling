@@ -5,6 +5,7 @@ import branca
 from bs4 import BeautifulSoup as soup
 import pandas as pd
 from folium.plugins import MarkerCluster
+import webbrowser
 
 # Credit for folium guide goes to https://www.youtube.com/watch?v=4RnU5qKTfYY
 # Credit for uk-counties JSON goes to https://github.com/deldersveld/topojson
@@ -97,10 +98,26 @@ def add_stylesheet():
         f.write(str(map_html))
 
 
+def open_browser():
+    url = os.path.join(os.path.dirname(__file__), 'incident_map.html')
+
+    # Credit to Shubham Rajput for answer on https://stackoverflow.com/questions/48056052/webbrowser-get-could-not-locate-runnable-browser?rq=1
+
+    # If initialize.py is run, this will always exist here
+    chrome_path = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+
+    # print(webbrowser._browsers) nothing registering so just register it myself, as always guaranteed to exist
+    webbrowser.register('chrome', None, webbrowser.BackgroundBrowser(chrome_path))
+
+    # Open in chrome because chrome is best
+    webbrowser.get('chrome').open_new_tab(url)
+
+
 def main():
 
     add_markers()
     county_plot()
     add_stylesheet()
+    open_browser()
 
 main()
