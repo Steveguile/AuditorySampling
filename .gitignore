@@ -1,5 +1,6 @@
 venv/
-data/traffic_audio.csv
+data/test_traffic_audio.csv
+data/train_traffic_audio.csv
 data/audio_files.csv
 data/audio/*
 !data/audio/Description.txt

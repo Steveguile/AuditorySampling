@@ -14,6 +14,7 @@ import geopip
 # np.set_printoptions(threshold=np.inf)
 
 audio_sub_dir = r"data/audio"
+use_dirs = ['Test', 'Train']
 
 file_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], audio_sub_dir)
 output_file = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data")
@@ -226,6 +227,10 @@ def modify_sp_attributes(dict_list, dict_keys):
 
     for audio_dict in dict_list:
         for flatness in SpFlt:
+
+            if audio_dict[flatness] == "?":
+                audio_dict[flatness] = max_val
+
             if audio_dict[flatness] > max_val:
                 max_val = audio_dict[flatness]
             elif audio_dict[flatness] < min_val:
@@ -240,6 +245,10 @@ def modify_sp_attributes(dict_list, dict_keys):
         min_val = 50000000
 
         for centroid in SpCen:
+
+            if audio_dict[centroid] == "?":
+                audio_dict[centroid] = max_val
+
             if audio_dict[centroid] > max_val:
                 max_val = audio_dict[centroid]
             elif audio_dict[centroid] < min_val:
@@ -290,30 +299,36 @@ def main():
     audio_dict = {}
     dict_list = []
 
-    for directory in os.listdir(file_path):
-        for file_name in os.listdir(os.path.join(file_path, directory)):
+    for dir_type in use_dirs:
+        for directory in os.listdir(os.path.join(file_path, dir_type)):
+            for file_name in os.listdir(os.path.join(file_path, dir_type, directory)):
 
-            class_attribute = "No"
+                print(directory)
 
-            if directory == "Traffic_Incident": # TODO This is bad, don't do this
-                class_attribute = "Yes"
+                class_attribute = "No"
 
-            frequency_array, frequency_array_length, sample_rate = amp_to_freq(os.path.join(file_path, directory) + r"\\" + file_name)
-            add_attributes(frequency_array, frequency_array_length, audio_dict, file_name.split('.')[0], sample_rate)
-            audio_dict["TrafficIncident"] = class_attribute
-            dict_list.append(copy.deepcopy(audio_dict))  # Need deepcopy or would overwrite previous key value
+                if directory == "Traffic_Incident": # TODO This is bad, don't do this
+                    class_attribute = "Yes"
 
-            # NEED TO DEFAULT DICT KEY VALUE TO "?" after each loop for unknown values for shorter audio clips
-            audio_dict = {x: "?" for x in audio_dict}
+                frequency_array, frequency_array_length, sample_rate = amp_to_freq(os.path.join(file_path, dir_type, directory) + r"\\" + file_name)
+                add_attributes(frequency_array, frequency_array_length, audio_dict, file_name.split('.')[0], sample_rate)
+                audio_dict["TrafficIncident"] = class_attribute
+                dict_list.append(copy.deepcopy(audio_dict))  # Need deepcopy or would overwrite previous key value
+
+                # NEED TO DEFAULT DICT KEY VALUE TO "?" after each loop for unknown values for shorter audio clips
+                audio_dict = {x: "?" for x in audio_dict}
 
 
-    dict_keys = dict_list[0].keys()
-    output_list = modify_sp_attributes(dict_list, dict_keys)
+        dict_keys = dict_list[0].keys()
+        output_list = modify_sp_attributes(dict_list, dict_keys)
 
-    with open(os.path.join(output_file, "traffic_audio.csv"), "w", newline='') as f:
-        dict_writer = csv.DictWriter(f, dict_keys)
-        dict_writer.writeheader()
-        dict_writer.writerows(output_list)
+        with open(os.path.join(output_file, dir_type.lower() + "_traffic_audio.csv"), "w", newline='') as f:
+            dict_writer = csv.DictWriter(f, dict_keys)
+            dict_writer.writeheader()
+            dict_writer.writerows(output_list)
+
+        audio_dict = {}
+        dict_list = []
 
 
 main()

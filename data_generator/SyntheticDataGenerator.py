@@ -4,20 +4,21 @@ import os
 from random import randint, uniform
 import string
 import random
-
-# import AttributeGenerator as ag
+import shutil
+from math import floor, ceil
 
 # File paths
-audio_path_in = r"E:\Steve_Files\Work\University\Year 4\Project\My Project\Audio_Files\Audio_Files_Converted\\"
-audio_path_out = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data\audio")
+audio_path_in = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data\audio\Original_Files")
+train_audio_path_out = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data\audio\Train")
+test_audio_path_out = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data\audio\Test")
 
 # Input Folder Names (Can be changed for anything)
-road_noise = r"\Road_Noise\\"
-added_audio = r"\Added_Audio\\"
+road_noise = r"Road_Noise\\"
+added_audio = r"Added_Audio\\"
 
 # Output Folder Names (Can be changed for anything)
-no_traffic_incident = r"\No_Traffic_Incident\\"
-traffic_incident = r"\Traffic_Incident\\"
+no_traffic_incident = r"No_Traffic_Incident\\"
+traffic_incident = r"Traffic_Incident\\"
 
 # PyDub does things in milliseconds
 # ten_seconds = 10 * 1000
@@ -45,21 +46,30 @@ def speed_change(sound, speed=1.0):
     return sound_with_altered_frame_rate.set_frame_rate(sound.frame_rate)
 
 
-def the_slicer():
-    for filename in os.listdir(audio_path_in + road_noise):
-        audio = AudioSegment.from_wav(audio_path_in + road_noise + filename)
+def the_slicer(path):
+    for filename in os.listdir(os.path.join(audio_path_in, road_noise)):
+        audio = AudioSegment.from_wav(os.path.join(audio_path_in, road_noise, filename))
         for i, chunk in enumerate(audio[::audio_length]):
-            with open(audio_path_out + no_traffic_incident + generate_reference() + ".wav" , "wb") as f:
+            with open(os.path.join(path, no_traffic_incident , generate_reference(path) + ".wav"), "wb") as f:
                 chunk.export(f, format="wav")
 
             if i == max_from_source - 1:  # Only really want x amount of instances from any single audio file
                 break
 
 
-def get_crash_audio():
-    audio_file = randint(0, len(os.listdir(audio_path_in + added_audio)))
-    read_file = audio_path_in + added_audio + os.listdir((audio_path_in + added_audio))[audio_file - 1]
-    audio = AudioSegment.from_wav(read_file) - randint(15, 25) # Always reduce as incidents are much louder than normal audio, 15-25db seems suitable
+def get_crash_audio(path):
+    read_file = -1
+    dir_size = len(os.listdir(os.path.join(audio_path_in, added_audio)))
+
+    if path == test_audio_path_out:
+        # 30% of road accident audio files to be used exclusively for holdout set
+        read_file = randint(dir_size - floor((dir_size / 100) * 30), dir_size)
+    elif path == train_audio_path_out:
+        # 70 % left for training
+        read_file = randint(0, ceil((dir_size / 100) * 70))
+
+    crash_file = os.path.join(audio_path_in, added_audio, os.listdir(os.path.join(audio_path_in, added_audio))[read_file - 1])
+    audio = AudioSegment.from_wav(crash_file) - randint(15, 25) # Always reduce as incidents are much louder than normal audio, 15-25db seems suitable
 
     # Do 1 of 3: 1 - Stretch audio, 3 - Reverse audio, else - Leave audio as is
     option = randint(1,4)
@@ -74,42 +84,39 @@ def get_crash_audio():
     else:
         audio_segment = audio
 
-    # audio_segment.export(open(output_path + traffic_incident + "test.wav", "wb"), format="wav")
     return audio_segment
 
 
-# TODO: Make it so original road audio is never used twice, can be solved by TODO under "Road noise with crash"
-def get_road_audio():
-    audio_file = randint(0, len(os.listdir(audio_path_out + no_traffic_incident)))
-    read_file = audio_path_out + no_traffic_incident + os.listdir((audio_path_out + no_traffic_incident))[audio_file - 1]
+def get_road_audio(path):
+    audio_file = randint(0, len(os.listdir(os.path.join(path, no_traffic_incident))))
+    read_file = os.path.join(path, no_traffic_incident, os.listdir(os.path.join(path, no_traffic_incident))[audio_file - 1])
     audio = AudioSegment.from_wav(read_file)
 
     return audio
 
 
-def overlay_audio():
-    # TODO: Convert this to instead of reading, create a copy + crash when writing initial snipped audio file for performance
-    check_dir = os.listdir(audio_path_out + no_traffic_incident)
+def overlay_audio(path):
+    check_dir = os.listdir(os.path.join(path, no_traffic_incident))
     crash_audio_quantity = int(len(check_dir) / class_ratio) # How many traffic incidents to overlay
 
     for i in range(0, crash_audio_quantity):
-        crash_audio = get_crash_audio()
-        traffic_audio = get_road_audio()
+        crash_audio = get_crash_audio(path)
+        traffic_audio = get_road_audio(path)
 
-        reference = generate_reference()
+        reference = generate_reference(path)
         overlaid_audio = traffic_audio.overlay(crash_audio)
 
-        with open(audio_path_out + traffic_incident + reference + ".wav", "wb") as f:
+        with open(os.path.join(path, traffic_incident, reference + ".wav"), "wb") as f:
             overlaid_audio.export(f, format="wav")
 
 
-def generate_reference():
+def generate_reference(path):
     reference_list = []
 
     # Current audio file reference names
-    for filename in os.listdir(audio_path_out + no_traffic_incident):
+    for filename in os.listdir(os.path.join(path, no_traffic_incident)):
         reference_list.append(filename.split('.')[0])
-    for filename in os.listdir(audio_path_out + traffic_incident):
+    for filename in os.listdir(os.path.join(path, traffic_incident)):
         reference_list.append(filename.split('.')[0])
 
     # Credit to StackOverflow user Ignacio Vazquez-Abrams for answer on https://stackoverflow.com/questions/2257441/random-string-generation-with-upper-case-letters-and-digits-in-python
@@ -120,14 +127,23 @@ def generate_reference():
     return reference
 
 
+def refresh_dirs(path):
+    # Refresh these directories
+    shutil.rmtree(os.path.join(path, no_traffic_incident))
+    os.mkdir(os.path.join(path, no_traffic_incident))
+    shutil.rmtree(os.path.join(path, traffic_incident))
+    os.mkdir(os.path.join(path, traffic_incident))
+
+
 def main():
 
-    the_slicer()
+    refresh_dirs(train_audio_path_out)
+    the_slicer(train_audio_path_out)
+    overlay_audio(train_audio_path_out)
 
-    # Road noise with crash
-    overlay_audio()
-
-    generate_reference()
+    refresh_dirs(test_audio_path_out)
+    the_slicer(test_audio_path_out)
+    overlay_audio(test_audio_path_out)
 
 
 main()
