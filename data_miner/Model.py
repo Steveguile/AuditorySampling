@@ -9,10 +9,11 @@ import csv
 import random
 import geopip
 
-audio_sub_dir = r"data/audio"
+# /Test because using holdout
+audio_sub_dir = r"data/audio/Test"
 
 model_name = 'DecisionTreeClassifier(max_depth = 5, max_features = None, min_samples_split = 10)'
-csv_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], "data/traffic_audio.csv")
+csv_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], "data/test_traffic_audio.csv")
 model_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], "data/models/")
 out_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], 'data')
 

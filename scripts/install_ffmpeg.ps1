@@ -1,0 +1,12 @@
+$Version = "ffmpeg-20190329-9dece05-win64-static";
+$Path = $env:TEMP; 
+$Zip = "FFmpeg.zip"; 
+$InstallDir = $env:homedrive+"\FFmpeg"; 
+Remove-Item $InstallDir;
+mkdir $InstallDir;
+$WebLoc = "https://ffmpeg.zeranoe.com/builds/win64/static/"+$Version+".zip";
+Invoke-WebRequest $WebLoc  -OutFile $Path\$Zip; 
+expand-archive -path $Path\$Zip -destinationpath $InstallDir;
+Get-ChildItem -Path $InstallDir\$Version | Move-Item -Destination $InstallDir;
+Remove-Item $InstallDir\$Version;
+Remove-Item $Path\$Zip;

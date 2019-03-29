@@ -303,8 +303,6 @@ def main():
         for directory in os.listdir(os.path.join(file_path, dir_type)):
             for file_name in os.listdir(os.path.join(file_path, dir_type, directory)):
 
-                print(directory)
-
                 class_attribute = "No"
 
                 if directory == "Traffic_Incident": # TODO This is bad, don't do this

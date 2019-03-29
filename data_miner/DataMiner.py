@@ -18,7 +18,7 @@ warnings.filterwarnings(action="ignore", category=DeprecationWarning) # Don't ca
 warnings.filterwarnings(action="ignore", category=FutureWarning) # Don't care for this
 
 
-csv_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], "data/traffic_audio.csv")
+csv_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], "data/train_traffic_audio.csv")
 model_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], "data/models/")
 performance_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], "data/performance_scores.csv")
 
