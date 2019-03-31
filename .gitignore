@@ -7,3 +7,4 @@ data/audio/*
 incident_map.html
 data/incorrect_predictions.csv
 data/performance_scores.csv
+data/models/*

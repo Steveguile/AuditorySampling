@@ -8,6 +8,8 @@ import copy
 import csv
 import random
 import geopip
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from tabulate import tabulate
 
 # /Test because using holdout
 audio_sub_dir = r"data/audio/Test"
@@ -57,6 +59,20 @@ def coord_data():
         return coord_data()
 
 
+def performance_measures(predicted, actual):
+    pos_label = 'Yes'
+    accuracy = accuracy_score(actual, predicted)
+    precision = precision_score(actual, predicted, pos_label=pos_label)
+    recall = recall_score(actual, predicted, pos_label=pos_label)
+    f_score = f1_score(actual, predicted, pos_label=pos_label)
+
+    print(tabulate([["Classification Accuracy", accuracy],
+                    ["Precision", precision],
+                    ["Recall", recall],
+                    ["F-Score", f_score]],
+                   headers=["","Score"]))
+
+
 def main():
     classifier = pickle.load(open(model_path + model_name, 'rb'))
 
@@ -77,6 +93,8 @@ def main():
     display_tree(classifier, headers, np.unique(target))
 
     predicted = classifier.predict(dataset)
+
+    performance_measures(predicted, target)
 
     reference_dict = {}
     incorrect_predictions = []
