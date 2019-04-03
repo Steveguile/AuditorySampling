@@ -137,13 +137,15 @@ def refresh_dirs(path):
 
 def main():
 
-    refresh_dirs(train_audio_path_out)
-    the_slicer(train_audio_path_out)
-    overlay_audio(train_audio_path_out)
+    if os.path.isdir(os.path.join(audio_path_in, road_noise)):
+        refresh_dirs(train_audio_path_out)
+        the_slicer(train_audio_path_out)
+        overlay_audio(train_audio_path_out)
 
-    refresh_dirs(test_audio_path_out)
-    the_slicer(test_audio_path_out)
-    overlay_audio(test_audio_path_out)
-
+        refresh_dirs(test_audio_path_out)
+        the_slicer(test_audio_path_out)
+        overlay_audio(test_audio_path_out)
+    else:
+        print("This is not a valid input file")
 
 main()

@@ -74,63 +74,68 @@ def performance_measures(predicted, actual):
 
 
 def main():
-    classifier = pickle.load(open(model_path + model_name, 'rb'))
 
-    csv_file = pd.read_csv(csv_path, header=0)
-
-    # Shuffle Dataset
-    dataset = csv_file.sample(frac=1, random_state=42).reset_index(drop=True)
-
-    references = dataset["reference"]
-    dataset = dataset.drop("reference", axis=1)
-    headers = list(dataset.columns.values)
-
-    target = list(dataset["TrafficIncident"])
-    dataset = dataset.drop("TrafficIncident", axis=1).get_values()
-
-    headers.remove("TrafficIncident")
-
-    display_tree(classifier, headers, np.unique(target))
-
-    predicted = classifier.predict(dataset)
-
-    performance_measures(predicted, target)
-
-    reference_dict = {}
-    incorrect_predictions = []
-    predicted_true = []
-
-    for i, reference in enumerate(references):
-        reference_dict.update({"Reference": reference, "Actual": target[i], "Predicted": predicted[i]})
-
-        if reference_dict["Predicted"] == 'Yes':
-            predicted_true.append(copy.deepcopy(reference_dict))
-
-        if reference_dict["Actual"] != reference_dict["Predicted"]:
-            incorrect_predictions.append(copy.deepcopy(reference_dict))
-
-    # Incorrect predictions
-    keys = incorrect_predictions[0].keys()
-    to_csv(os.path.join(out_path, "incorrect_predictions.csv"), keys, incorrect_predictions)
+    if os.path.isfile(csv_path):
+        classifier = pickle.load(open(model_path + model_name, 'rb'))
 
 
-    # Predicted true
-    for dict in predicted_true:
-        x, y = coord_data()
-        dict.update({"XCoord": x, "YCoord": y})
+        csv_file = pd.read_csv(csv_path, header=0)
 
-        if os.path.isfile(os.path.join(file_path, no_traffic_incident, dict["Reference"]) + ".wav"):
-          dict["Directory"] = os.path.join(audio_sub_dir, no_traffic_incident, dict["Reference"])
-        else:
-          dict["Directory"] = os.path.join(audio_sub_dir, traffic_incident, dict["Reference"])
+        # Shuffle Dataset
+        dataset = csv_file.sample(frac=1, random_state=42).reset_index(drop=True)
 
-        dict["FileType"] = ".wav"
+        references = dataset["reference"]
+        dataset = dataset.drop("reference", axis=1)
+        headers = list(dataset.columns.values)
 
-        dict.pop("Actual")
-        dict.pop("Predicted")
+        target = list(dataset["TrafficIncident"])
+        dataset = dataset.drop("TrafficIncident", axis=1).get_values()
 
-    keys = predicted_true[0].keys()
-    to_csv(os.path.join(out_path, "audio_files.csv"), keys, predicted_true)
+        headers.remove("TrafficIncident")
+
+        display_tree(classifier, headers, np.unique(target))
+
+        predicted = classifier.predict(dataset)
+
+        performance_measures(predicted, target)
+
+        reference_dict = {}
+        incorrect_predictions = []
+        predicted_true = []
+
+        for i, reference in enumerate(references):
+            reference_dict.update({"Reference": reference, "Actual": target[i], "Predicted": predicted[i]})
+
+            if reference_dict["Predicted"] == 'Yes':
+                predicted_true.append(copy.deepcopy(reference_dict))
+
+            if reference_dict["Actual"] != reference_dict["Predicted"]:
+                incorrect_predictions.append(copy.deepcopy(reference_dict))
+
+        # Incorrect predictions
+        keys = incorrect_predictions[0].keys()
+        to_csv(os.path.join(out_path, "incorrect_predictions.csv"), keys, incorrect_predictions)
+
+
+        # Predicted true
+        for dict in predicted_true:
+            x, y = coord_data()
+            dict.update({"XCoord": x, "YCoord": y})
+
+            if os.path.isfile(os.path.join(file_path, no_traffic_incident, dict["Reference"]) + ".wav"):
+              dict["Directory"] = os.path.join(audio_sub_dir, no_traffic_incident, dict["Reference"])
+            else:
+              dict["Directory"] = os.path.join(audio_sub_dir, traffic_incident, dict["Reference"])
+
+            dict["FileType"] = ".wav"
+
+            dict.pop("Actual")
+            dict.pop("Predicted")
+
+        keys = predicted_true[0].keys()
+        to_csv(os.path.join(out_path, "audio_files.csv"), keys, predicted_true)
+    else:
+        print("This is not a valid input file")
 
 main()
 
