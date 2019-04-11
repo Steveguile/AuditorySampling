@@ -1,5 +1,5 @@
 # Get base image
-FROM ubuntu:18.04
+FROM ubuntu:16.04
 
 MAINTAINER stevewhitehead pal <stephenewhitehead@outlook.com>
 
@@ -10,6 +10,7 @@ RUN apt-get -y install python3
 RUN apt-get -y install python3-pip
 RUN apt-get -y install ffmpeg
 RUN apt-get -y install graphviz
+RUN apt-get -y install chromium-browser
 
 
 # Requirement for pyodbc
@@ -20,11 +21,10 @@ WORKDIR /src
 
 RUN pip3 install -r /src/dependencies.txt
 
-# For some reason pip3 wont' install geopip unless already installed using pip 
+# For some reason pip3 wont install geopip unless already installed using pip 
 RUN apt-get -y install python-pip 
 RUN pip install geopip
 RUN pip3 install geopip
-
 
 # CMD gets executed upon creation of container
 

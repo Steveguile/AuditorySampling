@@ -10,20 +10,26 @@ import random
 import geopip
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from tabulate import tabulate
+import platform
 
 # /Test because using holdout
-audio_sub_dir = r"data/audio/Test"
+audio_sub_dir = os.path.join("data", "audio", "Test")
+
+if platform.system() == "Linux":
+    dir_name = ''
+else:
+    dir_name = os.path.dirname(__file__).rsplit("/", 1)[0]
 
 model_name = 'DecisionTreeClassifier(max_depth = 5, max_features = None, min_samples_split = 10)'
-csv_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], "data/test_traffic_audio.csv")
-model_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], "data/models/")
-out_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], 'data')
+csv_path = os.path.join(dir_name, "data", "test_traffic_audio.csv")
+model_path = os.path.join(dir_name, "data", "models")
+out_path = os.path.join(dir_name, 'data')
 
-file_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], audio_sub_dir)
+file_path = os.path.join(dir_name, audio_sub_dir)
 
 # Output Folder Names (Can be changed for anything)
-no_traffic_incident = r"No_Traffic_Incident"
-traffic_incident = r"Traffic_Incident"
+no_traffic_incident = "No_Traffic_Incident"
+traffic_incident = "Traffic_Incident"
 
 def display_tree(classifier, headers, target):
     dot_data = tree.export_graphviz(classifier,
@@ -70,14 +76,13 @@ def performance_measures(predicted, actual):
                     ["Precision", precision],
                     ["Recall", recall],
                     ["F-Score", f_score]],
-                   headers=["","Score"]))
+                   headers=["", "Score"]))
 
 
 def main():
 
     if os.path.isfile(csv_path):
-        classifier = pickle.load(open(model_path + model_name, 'rb'))
-
+        classifier = pickle.load(open(os.path.join(model_path, model_name), 'rb'))
 
         csv_file = pd.read_csv(csv_path, header=0)
 
@@ -135,9 +140,7 @@ def main():
         keys = predicted_true[0].keys()
         to_csv(os.path.join(out_path, "audio_files.csv"), keys, predicted_true)
     else:
-        print("This is not a valid input file")
+        print(csv_path + "is not a valid input file")
+
 
 main()
-
-
-

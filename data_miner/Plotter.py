@@ -2,26 +2,34 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+import platform
 
-plot_dir = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data\plots")
+
+if platform.system() == "Linux":
+    dir_name = ''
+else:
+    dir_name = os.path.dirname(__file__).rsplit("/", 1)[0]
+
+plot_dir = os.path.join(dir_name, "data", "plots")
 use_dirs = ['Test', 'Train']
 
-def heat_map(type, dataset):
+
+def heat_map(set_type, dataset):
     # Correlation Matrix Heatmap
     f, ax = plt.subplots(figsize=(10, 6))
 
     correlation = dataset.corr()
 
-    hm = sns.heatmap(round(correlation,2), annot=True, ax=ax, cmap="coolwarm",fmt='.2f',
+    hm = sns.heatmap(round(correlation,2), annot=True, ax=ax, cmap="coolwarm", fmt='.2f',
                      linewidths=.05, annot_kws={"size": 6})
 
     f.subplots_adjust(top=0.93)
     #f = f.suptitle(type + ' Audio Data Correlation Heatmap', fontsize=14, va="top")
     # plt.show()
-    plt.savefig(os.path.join(plot_dir, type.lower()+"_heatmap.png"), bbox_inches='tight')
+    plt.savefig(os.path.join(plot_dir, set_type.lower()+"_heatmap.png"), bbox_inches='tight')
 
 
-def pairwise_scatter(type, headers, dataset):
+def pairwise_scatter(set_type, headers, dataset):
     # Scatter Plot
     cols = headers
     pp = sns.pairplot(dataset[cols], hue='TrafficIncident', height=1.8, aspect=1.8,
@@ -33,7 +41,7 @@ def pairwise_scatter(type, headers, dataset):
     fig.subplots_adjust(top=0.93, wspace=0.3)
     #f = fig.suptitle(type + 'Audio Data Pairwise Plots', fontsize=14, va="top")
     # plt.show()
-    plt.savefig(os.path.join(plot_dir, type.lower()+"_scatter.png"), bbox_inches='tight')
+    plt.savefig(os.path.join(plot_dir, set_type.lower()+"_scatter.png"), bbox_inches='tight')
 
 
 def main():

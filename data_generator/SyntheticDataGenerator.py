@@ -6,19 +6,25 @@ import string
 import random
 import shutil
 from math import floor, ceil
+import platform
+
+if platform.system() == "Linux":
+    dir_name = ''
+else:
+    dir_name = os.path.dirname(__file__).rsplit("/", 1)[0]
 
 # File paths
-audio_path_in = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data\audio\Original_Files")
-train_audio_path_out = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data\audio\Train")
-test_audio_path_out = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data\audio\Test")
+audio_path_in = os.path.join(dir_name, "data", "audio", "Original_Files")
+train_audio_path_out = os.path.join(dir_name, "data", "audio", "Train")
+test_audio_path_out = os.path.join(dir_name, "data", "audio", "Test")
 
 # Input Folder Names (Can be changed for anything)
-road_noise = r"Road_Noise\\"
-added_audio = r"Added_Audio\\"
+road_noise = r"Road_Noise"
+added_audio = r"Added_Audio"
 
 # Output Folder Names (Can be changed for anything)
-no_traffic_incident = r"No_Traffic_Incident\\"
-traffic_incident = r"Traffic_Incident\\"
+no_traffic_incident = r"No_Traffic_Incident"
+traffic_incident = r"Traffic_Incident"
 
 # PyDub does things in milliseconds
 # ten_seconds = 10 * 1000
@@ -146,6 +152,7 @@ def main():
         the_slicer(test_audio_path_out)
         overlay_audio(test_audio_path_out)
     else:
-        print("This is not a valid input file")
+        print(os.path.join(audio_path_in, road_noise) + "is is not a valid input file")
+
 
 main()

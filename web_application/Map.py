@@ -1,4 +1,4 @@
-import folium
+﻿import folium
 import pyodbc
 import os
 import branca
@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup as soup
 import pandas as pd
 from folium.plugins import MarkerCluster
 import webbrowser
+import platform
 
 # Credit for folium guide goes to https://www.youtube.com/watch?v=4RnU5qKTfYY
 # Credit for uk-counties JSON goes to https://github.com/deldersveld/topojson
@@ -13,6 +14,11 @@ import webbrowser
 
 # db or csv
 read_type = 'csv'
+
+if platform.system() == "Linux":
+    dir_name = ''
+else:
+    dir_name = os.path.dirname(__file__).rsplit("/", 1)[0]
 
 if read_type == 'db':
     connection = pyodbc.connect(
@@ -24,7 +30,7 @@ if read_type == 'db':
     cursor = connection.cursor()
     cursor.execute('SELECT * FROM dbo.Audio')
 elif read_type == 'csv':
-    input_file = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data\audio_files.csv")
+    input_file = os.path.join(dir_name, "data", "audio_files.csv")
     cursor = pd.read_csv(input_file, header=0)
 
 tooltip = 'Click for audio'
@@ -33,7 +39,7 @@ tooltip = 'Click for audio'
 m = folium.Map(location=[52.063, -1.533], zoom_start=8) # Center map to UK
 marker_cluster = MarkerCluster().add_to(m)
 # County Data for colourful map
-county_overlay = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], 'data\map_data', 'uk-counties.json')
+county_overlay = os.path.join(dir_name, 'data', 'map_data', 'uk-counties.json')
 
 
 def add_markers():
@@ -58,6 +64,7 @@ def add_markers():
 # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx colour bits
 def style_function(feature): # Don't actually care about the feature
     colour = awful_colour_thing(feature)
+    print(colour)
     return {
         'fillOpacity': 0.5,
         'weight': 0.3,
@@ -103,8 +110,12 @@ def open_browser():
 
     # Credit to Shubham Rajput for answer on https://stackoverflow.com/questions/48056052/webbrowser-get-could-not-locate-runnable-browser?rq=1
 
-    # If initialize.py is run, this will always exist here
-    chrome_path = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+    if platform.system() == "Linux":
+        chrome_path = "/usr/bin/chromium-browser"
+    # Never going on OS X
+    else:
+        # If initialize.py is run, this will always exist here
+        chrome_path = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
 
     # print(webbrowser._browsers) nothing registering so just register it myself, as always guaranteed to exist
     webbrowser.register('chrome', None, webbrowser.BackgroundBrowser(chrome_path))
@@ -119,5 +130,6 @@ def main():
     county_plot()
     add_stylesheet()
     open_browser()
+
 
 main()

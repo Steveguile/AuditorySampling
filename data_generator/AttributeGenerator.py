@@ -10,18 +10,24 @@ import csv
 import re
 import random
 import geopip
+import platform
 
 # np.set_printoptions(threshold=np.inf)
 
-audio_sub_dir = r"data/audio"
+audio_sub_dir = os.path.join("data", "audio")
 use_dirs = ['Test', 'Train']
 
-file_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], audio_sub_dir)
-output_file = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data")
+if platform.system() == "Linux":
+    dir_name = ''
+else:
+    dir_name = os.path.dirname(__file__).rsplit("/", 1)[0]
+
+file_path = os.path.join(dir_name, audio_sub_dir)
+output_file = os.path.join(dir_name, "data")
 
 # Output Folder Names (Can be changed for anything)
-no_traffic_incident = r"No_Traffic_Incident"
-traffic_incident = r"Traffic_Incident"
+no_traffic_incident = "No_Traffic_Incident"
+traffic_incident = "Traffic_Incident"
 
 
 #Credit to StackOverflow user Constntinius for his answer on https://stackoverflow.com/questions/13497891/python-getting-around-division-by-zero
@@ -331,7 +337,7 @@ def main():
             dict_list = []
 
     else:
-        print("This is not a valid input file")
+        print(os.path.join(file_path, use_dirs[0]) + "is is not a valid input file")
 
 
 
