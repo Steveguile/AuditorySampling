@@ -1,12 +1,12 @@
 # Get base image
-FROM ubuntu:16.04
+FROM ubuntu:17.10
 
 MAINTAINER stevewhitehead pal <stephenewhitehead@outlook.com>
 
 # RUN gets executed when building image
 RUN apt-get update
 
-RUN apt-get -y install python3
+RUN apt-get -y install python3.6
 RUN apt-get -y install python3-pip
 RUN apt-get -y install ffmpeg
 RUN apt-get -y install graphviz
