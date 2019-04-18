@@ -11,14 +11,18 @@ import geopip
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from tabulate import tabulate
 import platform
+from shutil import copyfile
+import errno
 
 # /Test because using holdout
 audio_sub_dir = os.path.join("data", "audio", "Test")
 
 if platform.system() == "Linux":
     dir_name = ''
+    server_root = '/var/www/html'
 else:
     dir_name = os.path.dirname(__file__).rsplit("/", 1)[0]
+    server_root = ''
 
 model_name = 'DecisionTreeClassifier(max_depth = 5, max_features = None, min_samples_split = 10)'
 csv_path = os.path.join(dir_name, "data", "test_traffic_audio.csv")
@@ -79,6 +83,48 @@ def performance_measures(predicted, actual):
                    headers=["", "Score"]))
 
 
+def output_incorrect_predictions(dict_list):
+    keys = dict_list[0].keys()
+    to_csv(os.path.join(out_path, "incorrect_predictions.csv"), keys, dict_list)
+
+
+def output_predictions(dict_list):
+    # Predicted true
+    for dict in dict_list:
+        x, y = coord_data()
+        dict.update({"XCoord": x, "YCoord": y})
+
+        if os.path.isfile(os.path.join(file_path, no_traffic_incident, dict["Reference"]) + ".wav"):
+            dict["Directory"] = os.path.join(audio_sub_dir, no_traffic_incident, dict["Reference"])
+        else:
+            dict["Directory"] = os.path.join(audio_sub_dir, traffic_incident, dict["Reference"])
+
+        dict["FileType"] = ".wav"
+
+        dict.pop("Actual")
+        dict.pop("Predicted")
+
+    keys = dict_list[0].keys()
+    to_csv(os.path.join(out_path, "audio_files.csv"), keys, dict_list)
+
+
+def move_file(current_dir, filetype):
+    # Credit to usr nbro for answer on https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
+    copyfile(os.path.join(current_dir + filetype), os.path.join(server_root, current_dir + filetype))
+
+
+def create_folders():
+
+    # Hard code because we know what it'll look like and to save doing it thousands of times in loop
+    if not os.path.exists(os.path.dirname(os.path.join(server_root, audio_sub_dir))):
+        try:
+            os.makedirs(os.path.join(server_root, audio_sub_dir, no_traffic_incident))
+            os.makedirs(os.path.join(server_root, audio_sub_dir, traffic_incident))
+        except OSError as exc:  # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+
+
 def main():
 
     if os.path.isfile(csv_path):
@@ -117,28 +163,16 @@ def main():
             if reference_dict["Actual"] != reference_dict["Predicted"]:
                 incorrect_predictions.append(copy.deepcopy(reference_dict))
 
-        # Incorrect predictions
-        keys = incorrect_predictions[0].keys()
-        to_csv(os.path.join(out_path, "incorrect_predictions.csv"), keys, incorrect_predictions)
+        output_incorrect_predictions(incorrect_predictions)
 
+        output_predictions(predicted_true)
 
-        # Predicted true
-        for dict in predicted_true:
-            x, y = coord_data()
-            dict.update({"XCoord": x, "YCoord": y})
+        # Only for deployement, move predicted true to server root
+        if platform.system() == "Linux":
+            create_folders()
+            for predicted in predicted_true:
+                move_file(predicted["Directory"], predicted["FileType"])
 
-            if os.path.isfile(os.path.join(file_path, no_traffic_incident, dict["Reference"]) + ".wav"):
-              dict["Directory"] = os.path.join(audio_sub_dir, no_traffic_incident, dict["Reference"])
-            else:
-              dict["Directory"] = os.path.join(audio_sub_dir, traffic_incident, dict["Reference"])
-
-            dict["FileType"] = ".wav"
-
-            dict.pop("Actual")
-            dict.pop("Predicted")
-
-        keys = predicted_true[0].keys()
-        to_csv(os.path.join(out_path, "audio_files.csv"), keys, predicted_true)
     else:
         print(csv_path + "is not a valid input file")
 

@@ -316,7 +316,7 @@ def main():
                     if directory == "Traffic_Incident":
                         class_attribute = "Yes"
 
-                    frequency_array, frequency_array_length, sample_rate = amp_to_freq(os.path.join(file_path, dir_type, directory) + r"\\" + file_name)
+                    frequency_array, frequency_array_length, sample_rate = amp_to_freq(os.path.join(file_path, dir_type, directory, file_name))
                     add_attributes(frequency_array, frequency_array_length, audio_dict, file_name.split('.')[0], sample_rate)
                     audio_dict["TrafficIncident"] = class_attribute
                     dict_list.append(copy.deepcopy(audio_dict))  # Need deepcopy or would overwrite previous key value

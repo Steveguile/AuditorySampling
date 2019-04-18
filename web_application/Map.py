@@ -7,6 +7,7 @@ import pandas as pd
 from folium.plugins import MarkerCluster
 import webbrowser
 import platform
+from shutil import copyfile
 
 # Credit for folium guide goes to https://www.youtube.com/watch?v=4RnU5qKTfYY
 # Credit for uk-counties JSON goes to https://github.com/deldersveld/topojson
@@ -15,9 +16,12 @@ import platform
 # db or csv
 read_type = 'csv'
 
+
 if platform.system() == "Linux":
+    directory = '/usr/share/nginx/html/'
     dir_name = ''
 else:
+    directory = os.path.dirname(__file__)
     dir_name = os.path.dirname(__file__).rsplit("/", 1)[0]
 
 if read_type == 'db':
@@ -89,33 +93,27 @@ def county_plot():
                     style_function=style_function
                     ).add_to(m)
 
-    m.save('incident_map.html')
-
 
 def add_stylesheet():
-    # Add css to folium generated file <link rel="stylesheet" href="leaflet.css"/>
-    map_html = soup(open('incident_map.html', 'r'), features="html.parser")
+    # Add css to folium generated file <link rel="stylesheet" href="css/style.css"/>
+    map_html = soup(open(os.path.join(directory, 'index.html'), 'r'), features="html.parser")
     head = map_html.find('link', {"href":"https://rawcdn.githack.com/python-visualization/folium/master/folium/templates/leaflet.awesome.rotate.css"}) # Insert as last stylesheet
     stylesheet = map_html.new_tag(name='link')
     stylesheet['rel'] = 'stylesheet'
-    stylesheet['href'] = 'leaflet.css'
+    stylesheet['href'] = './css/style.css'
     head.insert_after(stylesheet)
 
-    with open('incident_map.html', 'w') as f:
+    with open(os.path.join(directory, 'index.html'), 'w') as f:
         f.write(str(map_html))
 
 
 def open_browser():
-    url = os.path.join(os.path.dirname(__file__), 'incident_map.html')
+    url = os.path.join(directory, 'index.html')
 
     # Credit to Shubham Rajput for answer on https://stackoverflow.com/questions/48056052/webbrowser-get-could-not-locate-runnable-browser?rq=1
 
-    if platform.system() == "Linux":
-        chrome_path = "/usr/bin/chromium-browser"
-    # Never going on OS X
-    else:
-        # If initialize.py is run, this will always exist here
-        chrome_path = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+    # If initialize.py is run, this will always exist here
+    chrome_path = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
 
     # print(webbrowser._browsers) nothing registering so just register it myself, as always guaranteed to exist
     webbrowser.register('chrome', None, webbrowser.BackgroundBrowser(chrome_path))
@@ -128,8 +126,14 @@ def main():
 
     add_markers()
     county_plot()
+    m.save(os.path.join(directory, 'index.html'))
     add_stylesheet()
-    open_browser()
+
+    if platform.system() == "Linux":
+        # Everything went downhill when I started modifying code to deploy in linux container
+        copyfile(os.path.join(directory, 'index.html'), '/var/www/html/index.html')
+    else:
+        open_browser()
 
 
 main()
