@@ -13,6 +13,7 @@ from tabulate import tabulate
 import platform
 from shutil import copyfile
 import errno
+import time
 
 # /Test because using holdout
 audio_sub_dir = os.path.join("data", "audio", "Test")
@@ -127,6 +128,8 @@ def create_folders():
 
 def main():
 
+    start = time.time()
+
     if os.path.isfile(csv_path):
         classifier = pickle.load(open(os.path.join(model_path, model_name), 'rb'))
 
@@ -175,6 +178,10 @@ def main():
 
     else:
         print(csv_path + "is not a valid input file")
+
+    end = time.time()
+
+    print('Time to classify individual file:', str(((end - start) * 100) / len(csv_file.index)) + 'ms')
 
 
 main()

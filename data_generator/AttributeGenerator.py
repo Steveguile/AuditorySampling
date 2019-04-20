@@ -2,7 +2,6 @@ from scipy.stats import kurtosis, skew, mode
 from scipy.io.wavfile import read
 from scipy.fftpack import fft
 import numpy as np
-import matplotlib.pyplot as plt
 from librosa import feature as lb
 import copy
 import os
@@ -11,6 +10,7 @@ import re
 import random
 import geopip
 import platform
+import time
 
 # np.set_printoptions(threshold=np.inf)
 
@@ -300,6 +300,28 @@ def coord_data():
         return coord_data()
 
 
+# Used to check duration it takes to process 1 single audio file (for use in report when talking about speed)
+# Code is copied because DRY principle
+def process_single_file():
+    start = time.time()
+
+    input_path = os.path.join(dir_name, audio_sub_dir, use_dirs[0], no_traffic_incident)
+    file_name = os.listdir(input_path)[0]
+
+    audio_dict = {}
+    dict_list = []
+
+    frequency_array, frequency_array_length, sample_rate = amp_to_freq(os.path.join(input_path, file_name))
+    add_attributes(frequency_array, frequency_array_length, audio_dict, file_name.split('.')[0], sample_rate)
+    audio_dict["TrafficIncident"] = 'Doesn\'t Matter'
+    dict_list.append(audio_dict)
+    dict_keys = dict_list[0].keys()
+    output_list = modify_sp_attributes(dict_list, dict_keys)
+    end = time.time()
+
+    print('Time to generate attributes for individual file', str((end - start) * 100) + 'ms') #ms
+
+
 def main():
 
     audio_dict = {}
@@ -339,7 +361,7 @@ def main():
     else:
         print(os.path.join(file_path, use_dirs[0]) + "is is not a valid input file")
 
+    process_single_file()
 
 
 main()
-
