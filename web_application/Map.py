@@ -68,7 +68,6 @@ def add_markers():
 # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx colour bits
 def style_function(feature): # Don't actually care about the feature
     colour = awful_colour_thing(feature)
-    print(colour)
     return {
         'fillOpacity': 0.5,
         'weight': 0.3,

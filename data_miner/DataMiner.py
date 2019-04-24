@@ -123,7 +123,7 @@ def perform_classification(X_train, y_train, X_test, y_test, classifier, paramet
             param_dict['Content'] = performance_dict
             param_list.append(copy.deepcopy(param_dict))
 
-            pickle.dump(classifier, open(model_path + classifier_with_params, 'wb'))
+            pickle.dump(classifier, open(os.path.join(model_path, classifier_with_params), 'wb'))
 
     return param_list
 

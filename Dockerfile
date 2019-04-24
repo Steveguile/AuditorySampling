@@ -13,7 +13,6 @@ RUN apt-get -y install python3.6
 RUN apt-get -y install python3-pip
 RUN apt-get -y install ffmpeg
 RUN apt-get -y install graphviz
-RUN apt-get -y install chromium-browser
 
 
 # Requirement for pyodbc
@@ -35,8 +34,8 @@ RUN apt-get -y install nginx nodejs
 RUN rm -v /etc/nginx/nginx.conf
 
 COPY ./nginx.conf /etc/nginx/
-COPY ./web_application/index.html ./web_application/css/ /usr/share/nginx/html/
-COPY ./web_application/index.html ./web_application/css/ /var/www/html/
+COPY ./web_application/ /usr/share/nginx/html/
+COPY ./web_application/ /var/www/html/
 
 RUN echo "daemon off;" >> /etc/nginx/nginx.conf
 
