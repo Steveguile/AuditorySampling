@@ -14,6 +14,7 @@ Run scripts\install_docker.ps1
 **Installation of docker for this project currently only works for Windows, but the process for Linux can be found at: https://runnable.com/docker/install-docker-on-linux**
 
 **Run:** 
+
 docker build -t auditorysampler:v1.0 /path/to/directory **- create image from source**
 docker run -it -p 8080:80 (external port : internal port) --name give_it_a_name auditorysampler:v1.0 **- create container from image**
 
