@@ -9,6 +9,7 @@ It does this by **synthetically generating** data, performing **binary classific
 Open Powershell
 
 Set-ExecutionPolicy RemoteSigned
+
 Run scripts\install_docker.ps1
 
 **Installation of docker for this project currently only works for Windows, but the process for Linux can be found at: https://runnable.com/docker/install-docker-on-linux**
@@ -23,7 +24,7 @@ docker ps -a **- check container exists with name give_it_a_name**
 
 **Note**: Docker Desktop for Windows was used for its easy installation, and not having to set up Virtualbox. It is limited to 2GB memory under Hyper-V by default. If you would like to add more audio data that exceeds this memory limit (I.E process an audio file larger than 2GB), you can find examples on how to change this online.
 
-**Note 2** You'll probably have to remove the Docker Desktop for Windows executable as the removal from the script fails because the exe is being used when it tries to delete it. 🤷
+**Note 2**: You'll probably have to remove the Docker Desktop for Windows executable as the removal from the script fails because the exe is being used when it tries to delete it. 🤷
 
 ## In the container
 
