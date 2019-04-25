@@ -16,6 +16,7 @@ Run scripts\install_docker.ps1
 **Run:** 
 
 docker build -t auditorysampler:v1.0 /path/to/directory **- create image from source**
+
 docker run -it -p 8080:80 (external port : internal port) --name give_it_a_name auditorysampler:v1.0 **- create container from image**
 
 docker ps -a **- check container exists with name give_it_a_name**
