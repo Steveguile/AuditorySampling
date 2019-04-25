@@ -8,7 +8,6 @@ $DownloadLink = "https://download.docker.com/win/stable/Docker%20for%20Windows%2
 $Path = $env:TEMP; 
 $Exe = "Docker for Windows Installer.exe"; 
 $InstallDir = $env:homedrive+"\Program Files\Docker"; 
-Remove-Item $InstallDir
 Invoke-WebRequest $DownloadLink -OutFile $Path\$Exe; 
 & $Path\$Exe; 
 Remove-Item $Path\$Exe; 
