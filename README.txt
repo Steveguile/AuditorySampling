@@ -1,4 +1,3 @@
-
 # Welcome to the Auditory Sampler
 This project was created as a final year project under the **Computing** course for **Bournemouth University**. The purpose of this project is to implement a system that accurately predicts the occurrence of road traffic incidents from auditory data.
 
