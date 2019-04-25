@@ -9,21 +9,25 @@ from sklearn import exceptions
 from tabulate import tabulate
 import os
 import pickle
-from collections import OrderedDict
 import copy
 import csv
+import platform
 
 warnings.filterwarnings(action="ignore", category=exceptions.UndefinedMetricWarning) # If it's 0 that's fine
 warnings.filterwarnings(action="ignore", category=DeprecationWarning) # Don't care for this
 warnings.filterwarnings(action="ignore", category=FutureWarning) # Don't care for this
 
+if platform.system() == "Linux":
+    dir_name = ''
+else:
+    dir_name = os.path.dirname(__file__).rsplit("/", 1)[0]
 
-csv_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], "data/train_traffic_audio.csv")
-model_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], "data/models/")
-performance_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], "data/performance_scores.csv")
+csv_path = os.path.join(dir_name, "data", "train_traffic_audio.csv")
+model_path = os.path.join(dir_name, "data", "models")
+performance_path = os.path.join(dir_name, "data", "performance_scores.csv")
+
 
 def perform_classification(X_train, y_train, X_test, y_test, classifier, parameters, scorers, pos_label):
-
     # Cross-Validation
     gs = GridSearchCV(classifier,
                       param_grid=parameters,
@@ -79,7 +83,7 @@ def perform_classification(X_train, y_train, X_test, y_test, classifier, paramet
         param_dict['Content'] = performance_dict
         param_list.append(copy.deepcopy(param_dict))
 
-        pickle.dump(classifier, open(model_path + classifier_with_params, 'wb'))
+        pickle.dump(classifier, open(os.path.join(model_path, classifier_with_params), 'wb'))
 
 
     else:
@@ -119,7 +123,7 @@ def perform_classification(X_train, y_train, X_test, y_test, classifier, paramet
             param_dict['Content'] = performance_dict
             param_list.append(copy.deepcopy(param_dict))
 
-            pickle.dump(classifier, open(model_path + classifier_with_params, 'wb'))
+            pickle.dump(classifier, open(os.path.join(model_path, classifier_with_params), 'wb'))
 
     return param_list
 
@@ -189,3 +193,4 @@ def main():
 
 
 main()
+

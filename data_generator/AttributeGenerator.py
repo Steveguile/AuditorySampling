@@ -2,7 +2,6 @@ from scipy.stats import kurtosis, skew, mode
 from scipy.io.wavfile import read
 from scipy.fftpack import fft
 import numpy as np
-import matplotlib.pyplot as plt
 from librosa import feature as lb
 import copy
 import os
@@ -10,18 +9,25 @@ import csv
 import re
 import random
 import geopip
+import platform
+import time
 
 # np.set_printoptions(threshold=np.inf)
 
-audio_sub_dir = r"data/audio"
+audio_sub_dir = os.path.join("data", "audio")
 use_dirs = ['Test', 'Train']
 
-file_path = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], audio_sub_dir)
-output_file = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data")
+if platform.system() == "Linux":
+    dir_name = ''
+else:
+    dir_name = os.path.dirname(__file__).rsplit("/", 1)[0]
+
+file_path = os.path.join(dir_name, audio_sub_dir)
+output_file = os.path.join(dir_name, "data")
 
 # Output Folder Names (Can be changed for anything)
-no_traffic_incident = r"No_Traffic_Incident"
-traffic_incident = r"Traffic_Incident"
+no_traffic_incident = "No_Traffic_Incident"
+traffic_incident = "Traffic_Incident"
 
 
 #Credit to StackOverflow user Constntinius for his answer on https://stackoverflow.com/questions/13497891/python-getting-around-division-by-zero
@@ -294,6 +300,28 @@ def coord_data():
         return coord_data()
 
 
+# Used to check duration it takes to process 1 single audio file (for use in report when talking about speed)
+# Code is copied because DRY principle
+def process_single_file():
+    start = time.time()
+
+    input_path = os.path.join(dir_name, audio_sub_dir, use_dirs[0], no_traffic_incident)
+    file_name = os.listdir(input_path)[0]
+
+    audio_dict = {}
+    dict_list = []
+
+    frequency_array, frequency_array_length, sample_rate = amp_to_freq(os.path.join(input_path, file_name))
+    add_attributes(frequency_array, frequency_array_length, audio_dict, file_name.split('.')[0], sample_rate)
+    audio_dict["TrafficIncident"] = 'Doesn\'t Matter'
+    dict_list.append(audio_dict)
+    dict_keys = dict_list[0].keys()
+    output_list = modify_sp_attributes(dict_list, dict_keys)
+    end = time.time()
+
+    print('Time to generate attributes for individual file', str((end - start) * 100) + 'ms') #ms
+
+
 def main():
 
     audio_dict = {}
@@ -310,7 +338,7 @@ def main():
                     if directory == "Traffic_Incident":
                         class_attribute = "Yes"
 
-                    frequency_array, frequency_array_length, sample_rate = amp_to_freq(os.path.join(file_path, dir_type, directory) + r"\\" + file_name)
+                    frequency_array, frequency_array_length, sample_rate = amp_to_freq(os.path.join(file_path, dir_type, directory, file_name))
                     add_attributes(frequency_array, frequency_array_length, audio_dict, file_name.split('.')[0], sample_rate)
                     audio_dict["TrafficIncident"] = class_attribute
                     dict_list.append(copy.deepcopy(audio_dict))  # Need deepcopy or would overwrite previous key value
@@ -331,9 +359,9 @@ def main():
             dict_list = []
 
     else:
-        print("This is not a valid input file")
+        print(os.path.join(file_path, use_dirs[0]) + "is is not a valid input file")
 
+    process_single_file()
 
 
 main()
-

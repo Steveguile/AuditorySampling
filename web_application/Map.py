@@ -1,4 +1,4 @@
-import folium
+﻿import folium
 import pyodbc
 import os
 import branca
@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup as soup
 import pandas as pd
 from folium.plugins import MarkerCluster
 import webbrowser
+import platform
+from shutil import copyfile
 
 # Credit for folium guide goes to https://www.youtube.com/watch?v=4RnU5qKTfYY
 # Credit for uk-counties JSON goes to https://github.com/deldersveld/topojson
@@ -13,6 +15,14 @@ import webbrowser
 
 # db or csv
 read_type = 'csv'
+
+
+if platform.system() == "Linux":
+    directory = '/usr/share/nginx/html/'
+    dir_name = ''
+else:
+    directory = os.path.dirname(__file__)
+    dir_name = os.path.dirname(__file__).rsplit("/", 1)[0]
 
 if read_type == 'db':
     connection = pyodbc.connect(
@@ -24,7 +34,7 @@ if read_type == 'db':
     cursor = connection.cursor()
     cursor.execute('SELECT * FROM dbo.Audio')
 elif read_type == 'csv':
-    input_file = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], r"data\audio_files.csv")
+    input_file = os.path.join(dir_name, "data", "audio_files.csv")
     cursor = pd.read_csv(input_file, header=0)
 
 tooltip = 'Click for audio'
@@ -33,7 +43,7 @@ tooltip = 'Click for audio'
 m = folium.Map(location=[52.063, -1.533], zoom_start=8) # Center map to UK
 marker_cluster = MarkerCluster().add_to(m)
 # County Data for colourful map
-county_overlay = os.path.join(os.path.dirname(__file__).rsplit("/", 1)[0], 'data\map_data', 'uk-counties.json')
+county_overlay = os.path.join(dir_name, 'data', 'map_data', 'uk-counties.json')
 
 
 def add_markers():
@@ -82,24 +92,22 @@ def county_plot():
                     style_function=style_function
                     ).add_to(m)
 
-    m.save('incident_map.html')
-
 
 def add_stylesheet():
-    # Add css to folium generated file <link rel="stylesheet" href="leaflet.css"/>
-    map_html = soup(open('incident_map.html', 'r'), features="html.parser")
+    # Add css to folium generated file <link rel="stylesheet" href="css/style.css"/>
+    map_html = soup(open(os.path.join(directory, 'index.html'), 'r'), features="html.parser")
     head = map_html.find('link', {"href":"https://rawcdn.githack.com/python-visualization/folium/master/folium/templates/leaflet.awesome.rotate.css"}) # Insert as last stylesheet
     stylesheet = map_html.new_tag(name='link')
     stylesheet['rel'] = 'stylesheet'
-    stylesheet['href'] = 'leaflet.css'
+    stylesheet['href'] = './css/style.css'
     head.insert_after(stylesheet)
 
-    with open('incident_map.html', 'w') as f:
+    with open(os.path.join(directory, 'index.html'), 'w') as f:
         f.write(str(map_html))
 
 
 def open_browser():
-    url = os.path.join(os.path.dirname(__file__), 'incident_map.html')
+    url = os.path.join(directory, 'index.html')
 
     # Credit to Shubham Rajput for answer on https://stackoverflow.com/questions/48056052/webbrowser-get-could-not-locate-runnable-browser?rq=1
 
@@ -117,7 +125,14 @@ def main():
 
     add_markers()
     county_plot()
+    m.save(os.path.join(directory, 'index.html'))
     add_stylesheet()
-    open_browser()
+
+    if platform.system() == "Linux":
+        # Everything went downhill when I started modifying code to deploy in linux container
+        copyfile(os.path.join(directory, 'index.html'), '/var/www/html/index.html')
+    else:
+        open_browser()
+
 
 main()
