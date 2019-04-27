@@ -57,9 +57,9 @@ Order of file execution is the same as found above. Some other files exist that 
 |data_generator\AudioCutter.py</span>|Shortens road traffic files to 30 minutes (so not too big for container)|
 |data_generator\FormatConvert.py</span>|Converts file in directories to wav (not well configured at current version)|
 |data_generator\SyntheticDataGenerator.py</span>|Generate the audio files|
-|data_miner\DataMiner.py</span>|Test classifiers for performance scores on data, outputs classifiers at data\models\|
+|data_miner\DataMiner.py</span>|Test classifiers for performance scores on data, outputs classifiers at data\models|
 |data_miner\Model.py</span>|Perform binary classification using best performing model|
-|data_miner\Plotter.py</span>|Plots heatmap and scatter plots for data, found at data\plots\|
+|data_miner\Plotter.py</span>|Plots heatmap and scatter plots for data, found at data\plots|
 |web_application\Map.py</span>|Generate html file from predicted events|
 
 # Troubleshooting
