@@ -13,7 +13,7 @@ It does this by **synthetically generating** data, performing **binary classific
 
 **Installation of docker for this project currently only works for Windows 10 Pro, Education, and EE:**
 
-* The process for Linux can be found at: https://runnable.com/docker/install-docker-on-linux**		
+* The process for Linux can be found at: https://runnable.com/docker/install-docker-on-linux		
 * The process for alternative Windows versions can be found at: https://docs.docker.com/toolbox/toolbox_install_windows/		
 
 **In Cmd:** 
@@ -68,12 +68,13 @@ Order of file execution is the same as found above. Some other files exist that 
 
 # Troubleshooting
 
-- Docker run / start gets port failure error like:
--- Error response from daemon: driver failed programming external connectivity on endpoint dazzling_payne (8438a2ea5c3964d0df7b61468e0b92a8d193b0d8743e1bb3f30b005d6e59f7fc): Error starting userland proxy: mkdir /port/tcp:0.0.0.0:8080:tcp:172.17.0.2:80: input/output error
+- Docker run / start gets port failure error like: Error response from daemon: driver failed programming external connectivity on endpoint dazzling_payne (8438a2ea5c3964d0df7b61468e0b92a8d193b0d8743e1bb3f30b005d6e59f7fc): Error starting userland proxy: mkdir /port/tcp:0.0.0.0:8080:tcp:172.17.0.2:80: input/output error
+
 -- Restart Docker Desktop for Windows
 
-- Docker toolbox quick start treminal fails to start on Windows 10 with VBoxManage.exe error		
---https://github.com/docker/toolbox/issues/473
+- Docker toolbox quick start treminal fails to start on Windows 10 with VBoxManage.exe error	
+	
+-- https://github.com/docker/toolbox/issues/473
 
 
 
