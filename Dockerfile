@@ -34,8 +34,14 @@ RUN apt-get -y install nginx nodejs
 RUN rm -v /etc/nginx/nginx.conf
 
 COPY ./nginx.conf /etc/nginx/
+
 COPY ./web_application/ /usr/share/nginx/html/
+RUN mkdir -p /usr/share/nginx/html/data/audio
+COPY ./data/audio /usr/share/nginx/html/data/audio/
+
 COPY ./web_application/ /var/www/html/
+RUN mkdir -p /var/www/html/data/audio
+COPY ./data/audio /var/www/html/data/audio/
 
 RUN echo "daemon off;" >> /etc/nginx/nginx.conf
 

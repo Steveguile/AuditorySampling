@@ -7,7 +7,7 @@ import pandas as pd
 from folium.plugins import MarkerCluster
 import webbrowser
 import platform
-from shutil import copyfile
+from shutil import copyfile, SameFileError
 
 # Credit for folium guide goes to https://www.youtube.com/watch?v=4RnU5qKTfYY
 # Credit for uk-counties JSON goes to https://github.com/deldersveld/topojson
@@ -129,8 +129,24 @@ def main():
     add_stylesheet()
 
     if platform.system() == "Linux":
-        # Everything went downhill when I started modifying code to deploy in linux container
-        copyfile(os.path.join(directory, 'index.html'), '/var/www/html/index.html')
+	
+       # Everything went downhill when I started modifying code to deploy in Linux container, could supress warning,
+	   # but might as well use exception handling at least once in code though
+	   
+        try:
+            copyfile(os.path.join(directory, 'index.html'), '/var/www/html/index.html')
+        except SameFileError:
+            pass
+        else:
+            pass
+
+        try:
+            copyfile(os.path.join(directory, 'index.html'), '/usr/share/nginx/html/index.html')
+        except SameFileError:
+            pass
+        else:
+            pass
+			
     else:
         open_browser()
 
