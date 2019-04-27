@@ -4,6 +4,13 @@ This project was created as a final year project under the **Computing** course 
 
 It does this by **synthetically generating** data, performing **binary classification** on generated data, and displaying predictions on a lightweight **web application** . 
 
+**Before you begin running files, if you are cloning project from git you will need to set up audio file directory structure. This can be done as follows:** 
+
+- Run SetupStructure.py
+- Add road traffic audio to E:\Programming\Projects\Dissertation\AuditorySampling\data\audio\Original_Files\Road_Noise
+- Add traffic incident audio to E:\Programming\Projects\Dissertation\AuditorySampling\data\audio\Original_Files\Added_Audio
+- Run data_generator\AudioCutter.py to shorten length of road traffic audio (for docker RAM)
+
 ## Docker 
 ### Windows 10 Pro, Education, and EE
 

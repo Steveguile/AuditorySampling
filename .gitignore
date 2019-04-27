@@ -4,7 +4,7 @@ data/train_traffic_audio.csv
 data/audio_files.csv
 data/audio/*
 !data/audio/Description.txt
-incident_map.html
+web_application/index.html
 data/incorrect_predictions.csv
 data/performance_scores.csv
 data/models/*
