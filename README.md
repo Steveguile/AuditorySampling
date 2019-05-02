@@ -52,7 +52,7 @@ Connect to localhost port 8080 (or whichever you set as external port) on
 
 Recommended to run in Chrome, if installation does not currently exist, run scripts/install_chrome.ps1
 
-For docker toolboox, connect to machine ip by running docker-machine ip default (or whatever you named the vm) port 8080 (or whatever you set as external port
+**For docker toolbox:** connect to machine ip by running docker-machine ip default (or whatever you named the vm) port 8080 (or whatever you set as external port)
 
 ## Don't Want to use Docker?
  
