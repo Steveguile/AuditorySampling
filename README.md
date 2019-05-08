@@ -31,7 +31,7 @@ It does this by **synthetically generating** data, performing **binary classific
 
 **Note**: Docker Desktop for Windows was used for its easy installation, and not having to set up Virtualbox. It is limited to 2GB memory under Hyper-V by default. If you would like to add more audio data that exceeds this memory limit (I.E process an audio file larger than 2GB), you can find examples on how to change this online.
 
-**Note 2**: You'll probably have to remove the Docker Desktop for Windows executable from C:\Users\%Username%\AppData\Local\Temp manually as the removal from the script fails because the exe is being used when it tries to delete it. 🤷
+**Note 2**: You'll probably have to remove the Docker Desktop for Windows executable from C:\Users\%Username%\AppData\Local\Temp manually as the removal from the script fails because the exe is being used when it tries to delete it. 
 
 ## In the container
 
@@ -60,7 +60,7 @@ Recommended to run in Chrome, if installation does not currently exist, run scri
  
  Add this line: **;C:\GraphViz;C:\FFmpeg;**  to your system environment variable **Path** using the tutorial found at: https://support.microsoft.com/en-us/help/310519/how-to-manage-environment-variables-in-windows-xp
 
-Now all files in this project should work :+1:
+Now all files in this project should work
 
 Order of file execution is the same as found above. Some other files exist that allow data preparation before image is created.
 
